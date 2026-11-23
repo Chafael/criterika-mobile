@@ -7,16 +7,28 @@ import {
   Text,
   View,
   type StyleProp,
+  type TextStyle,
   type ViewStyle,
 } from 'react-native';
 
 import { pressMotion, radii, sizes, typography, useColors } from '@/theme';
+
+/** Face, hard shadow and label colors. Defaults to the theme's primary action. */
+export type PrimaryButtonPalette = {
+  face: string;
+  shadow: string;
+  label: string;
+};
 
 type PrimaryButtonProps = {
   label: string;
   onPress: () => void;
   style?: StyleProp<ViewStyle>;
   accessibilityHint?: string;
+  palette?: PrimaryButtonPalette;
+  /** Face height in px (52 by default, 130:2101). */
+  height?: number;
+  labelStyle?: StyleProp<TextStyle>;
 };
 
 /**
@@ -27,8 +39,21 @@ type PrimaryButtonProps = {
  * in 100 ms, covering that layer, so the shadow goes from 4 px to 0.
  * Only `transform` is animated, which runs on the native driver.
  */
-export function PrimaryButton({ label, onPress, style, accessibilityHint }: PrimaryButtonProps) {
+export function PrimaryButton({
+  label,
+  onPress,
+  style,
+  accessibilityHint,
+  palette,
+  height = sizes.primaryButtonHeight,
+  labelStyle,
+}: PrimaryButtonProps) {
   const colors = useColors();
+  const { face, shadow, label: labelColor } = palette ?? {
+    face: colors.primary,
+    shadow: colors.primaryShadow,
+    label: colors.onPrimary,
+  };
   const [offset] = useState(() => new Animated.Value(0));
 
   const animateTo = (toValue: number) => {
@@ -48,16 +73,16 @@ export function PrimaryButton({ label, onPress, style, accessibilityHint }: Prim
       onPress={onPress}
       onPressIn={() => animateTo(pressMotion.depth)}
       onPressOut={() => animateTo(0)}
-      style={[styles.root, style]}>
+      style={[styles.root, { height }, style]}>
       <View
-        style={[styles.layer, styles.shadow, { backgroundColor: colors.primaryShadow }]}
+        style={[styles.layer, styles.shadow, { backgroundColor: shadow }]}
       />
       <Animated.View
         style={[
           styles.layer,
-          { backgroundColor: colors.primary, transform: [{ translateY: offset }] },
+          { backgroundColor: face, transform: [{ translateY: offset }] },
         ]}>
-        <Text style={[typography.button, { color: colors.onPrimary }]}>{label}</Text>
+        <Text style={[typography.button, labelStyle, { color: labelColor }]}>{label}</Text>
       </Animated.View>
     </Pressable>
   );
@@ -65,7 +90,6 @@ export function PrimaryButton({ label, onPress, style, accessibilityHint }: Prim
 
 const styles = StyleSheet.create({
   root: {
-    height: sizes.primaryButtonHeight,
     width: '100%',
   },
   layer: {

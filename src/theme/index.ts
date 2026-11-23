@@ -2,6 +2,7 @@ import { useColorScheme } from 'react-native';
 
 import { colors, type ColorTokens } from './colors';
 
+export { alertColors, alertShadows, authColors, authTypography } from './auth';
 export { colors, sheetColors, type ColorScheme, type ColorTokens } from './colors';
 export { pressMotion, radii, shadows, sizes, spacing } from './metrics';
 export { fontFamily, typography } from './typography';
