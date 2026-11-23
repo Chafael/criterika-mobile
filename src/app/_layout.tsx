@@ -3,6 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { useSession } from '@/data/session';
 import { colors } from '@/theme';
 import { useAppFonts } from '@/theme/fonts';
 
@@ -10,6 +11,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { loaded, error } = useAppFonts();
+  const session = useSession();
   const ready = loaded || error !== null;
   const isDark = useColorScheme() === 'dark';
   const tokens = colors[isDark ? 'dark' : 'light'];
@@ -38,9 +40,17 @@ export default function RootLayout() {
     return null;
   }
 
+  // The app opens on the sign in screen; tabs only exist with a session.
   return (
     <ThemeProvider value={navigationTheme}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Protected guard={session !== null} redirectTo="/inicio-sesion">
+          <Stack.Screen name="(tabs)" />
+        </Stack.Protected>
+        <Stack.Protected guard={session === null}>
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+      </Stack>
     </ThemeProvider>
   );
 }
