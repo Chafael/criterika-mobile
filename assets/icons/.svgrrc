@@ -1,0 +1,9 @@
+{
+  "svgo": true,
+  "svgoConfig": {
+    "plugins": [
+      { "name": "removeAttrs", "params": { "attrs": "(style|overflow)" } },
+      { "name": "convertColors", "params": { "currentColor": true } }
+    ]
+  }
+}
