@@ -36,7 +36,11 @@ const buttonPalettes: Record<AlertTone, PrimaryButtonPalette> = {
     shadow: alertColors.primaryShadow,
     label: alertColors.onPrimary,
   },
-  danger: { face: alertColors.danger, shadow: alertColors.dangerShadow, label: alertColors.onDanger },
+  danger: {
+    face: alertColors.danger,
+    shadow: alertColors.dangerShadow,
+    label: alertColors.onDanger,
+  },
 };
 
 function defaultMascot(tone: AlertTone): ImageSourcePropType {
@@ -74,7 +78,10 @@ export function AlertCard({
         style={[
           styles.banner,
           danger
-            ? { backgroundColor: alertColors.bannerDanger, borderColor: alertColors.bannerDangerBorder }
+            ? {
+                backgroundColor: alertColors.bannerDanger,
+                borderColor: alertColors.bannerDangerBorder,
+              }
             : { backgroundColor: alertColors.surface, borderColor: alertColors.bannerBorder },
         ]}>
         <Image source={pose} style={styles.bannerPose} resizeMode="contain" />
@@ -104,12 +111,15 @@ export function AlertCard({
         style={[
           styles.mascotCircle,
           {
-            backgroundColor: tone === 'danger' ? alertColors.mascotDanger : alertColors.mascotNormal,
+            backgroundColor:
+              tone === 'danger' ? alertColors.mascotDanger : alertColors.mascotNormal,
           },
         ]}>
         <Image source={pose} style={styles.dialogPose} resizeMode="contain" />
       </View>
-      <Text accessibilityRole="header" style={[styles.centered, authTypography.alertTitle, { color: alertColors.title }]}>
+      <Text
+        accessibilityRole="header"
+        style={[styles.centered, authTypography.alertTitle, { color: alertColors.title }]}>
         {title}
       </Text>
       <Text style={[styles.centered, authTypography.alertMessage, { color: alertColors.message }]}>

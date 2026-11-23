@@ -61,7 +61,8 @@ export default function InicioSesion() {
               <icons.verified width={14.667} height={14} color={authColors.success} />
               <Text style={[typography.caption, { color: authColors.success }]}>Ética & Ley</Text>
             </View>
-            <Text style={[typography.title, styles.welcomeTitle, { color: authColors.textPrimary }]}>
+            <Text
+              style={[typography.title, styles.welcomeTitle, { color: authColors.textPrimary }]}>
               ¡Hola, colega!
             </Text>
             <Text style={[typography.body, { color: authColors.textSecondary }]}>
@@ -74,7 +75,9 @@ export default function InicioSesion() {
 
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text accessibilityRole="header" style={[authTypography.display, { color: authColors.textPrimary }]}>
+          <Text
+            accessibilityRole="header"
+            style={[authTypography.display, { color: authColors.textPrimary }]}>
             Iniciar sesión
           </Text>
           <Text style={[typography.body, { color: authColors.textSecondary }]}>
@@ -147,7 +150,9 @@ export default function InicioSesion() {
             accessibilityRole="link"
             onPress={() => router.push('/crear-cuenta')}
             style={styles.signUpLink}>
-            <Text style={[authTypography.fieldLabel, { color: authColors.link }]}>Crear cuenta</Text>
+            <Text style={[authTypography.fieldLabel, { color: authColors.link }]}>
+              Crear cuenta
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -194,7 +199,13 @@ const styles = StyleSheet.create({
     bottom: -24,
     backgroundColor: authColors.decorPrimary,
   },
-  decorSuccess: { width: 80, height: 80, left: 32, top: -32, backgroundColor: authColors.decorSuccess },
+  decorSuccess: {
+    width: 80,
+    height: 80,
+    left: 32,
+    top: -32,
+    backgroundColor: authColors.decorSuccess,
+  },
   welcomeText: { flex: 1, gap: 2, paddingRight: 12, alignItems: 'flex-start' },
   chip: {
     flexDirection: 'row',

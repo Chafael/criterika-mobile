@@ -74,11 +74,21 @@ export default function RecuperarContrasena() {
         </View>
         <Text
           accessibilityRole="header"
-          style={[authTypography.display, styles.center, styles.title, { color: authColors.textPrimary }]}>
+          style={[
+            authTypography.display,
+            styles.center,
+            styles.title,
+            { color: authColors.textPrimary },
+          ]}>
           Recuperar contraseña
         </Text>
         <Text
-          style={[authTypography.bodyLarge, styles.center, styles.description, { color: authColors.textSecondary }]}>
+          style={[
+            authTypography.bodyLarge,
+            styles.center,
+            styles.description,
+            { color: authColors.textSecondary },
+          ]}>
           Introduce tu correo electrónico registrado y te enviaremos un enlace para restablecer tu
           contraseña.
         </Text>
@@ -114,7 +124,8 @@ export default function RecuperarContrasena() {
 
         <View style={styles.trust}>
           <icons.shield width={12} height={17} color={authColors.link} />
-          <Text style={[authTypography.note, styles.trustText, { color: authColors.textSecondary }]}>
+          <Text
+            style={[authTypography.note, styles.trustText, { color: authColors.textSecondary }]}>
             En Criterika promovemos la privacidad: tus accesos se procesan mediante cifrado seguro
             conforme a normativas de protección de datos.
           </Text>

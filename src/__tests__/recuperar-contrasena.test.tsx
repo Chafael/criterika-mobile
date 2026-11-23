@@ -42,7 +42,9 @@ describe('Pantalla Recuperar contraseña', () => {
     await user.type(screen.getByLabelText('Correo electrónico'), 'jugador');
     await user.press(screen.getByRole('button', { name: 'Enviar enlace' }));
 
-    expect(screen.getByRole('alert', { name: /^Revisa tu correo electrónico\./ })).toBeOnTheScreen();
+    expect(
+      screen.getByRole('alert', { name: /^Revisa tu correo electrónico\./ }),
+    ).toBeOnTheScreen();
     expect(router.push).not.toHaveBeenCalled();
   });
 

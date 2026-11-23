@@ -16,7 +16,8 @@ import { authColors, authTypography, radii, shadows, sizes, typography } from '@
 const expiredCodeAlert: AlertContent = {
   tone: 'danger',
   title: 'El código venció',
-  message: 'Los códigos duran 10 minutos y sirven una sola vez. Pide uno nuevo con Reenviar código.',
+  message:
+    'Los códigos duran 10 minutos y sirven una sola vez. Pide uno nuevo con Reenviar código.',
 };
 
 /**

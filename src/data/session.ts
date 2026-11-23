@@ -12,7 +12,8 @@ export type SignInResult =
   | { status: 'invalid-credentials' }
   | { status: 'blocked' };
 
-export type VerifyCodeResult = { status: 'verified' } | { status: 'expired' } | { status: 'no-pending' };
+export type VerifyCodeResult =
+  { status: 'verified' } | { status: 'expired' } | { status: 'no-pending' };
 
 export type RegisterInput = {
   firstName: string;

@@ -45,14 +45,18 @@ describe('Pantalla Nueva contraseña', () => {
   it('exige los cuatro requisitos', async () => {
     await save('nueva2026', 'nueva2026');
 
-    expect(screen.getByRole('alert', { name: /^Tu contraseña aún no es segura\./ })).toBeOnTheScreen();
+    expect(
+      screen.getByRole('alert', { name: /^Tu contraseña aún no es segura\./ }),
+    ).toBeOnTheScreen();
     expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
   it('exige que la confirmación coincida', async () => {
     await save('Nueva#2026', 'Nueva#2027');
 
-    expect(screen.getByRole('alert', { name: /^Las contraseñas no coinciden\./ })).toBeOnTheScreen();
+    expect(
+      screen.getByRole('alert', { name: /^Las contraseñas no coinciden\./ }),
+    ).toBeOnTheScreen();
     expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
@@ -62,7 +66,10 @@ describe('Pantalla Nueva contraseña', () => {
 
     await user.press(screen.getByRole('button', { name: 'Mostrar nueva contraseña' }));
 
-    expect(screen.getByPlaceholderText('Crea una clave segura')).toHaveProp('secureTextEntry', false);
+    expect(screen.getByPlaceholderText('Crea una clave segura')).toHaveProp(
+      'secureTextEntry',
+      false,
+    );
     expect(screen.getByLabelText('Confirmar contraseña')).toHaveProp('secureTextEntry', true);
   });
 });

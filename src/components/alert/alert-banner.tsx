@@ -26,9 +26,7 @@ export function AlertBanner({ alert, onDismiss }: AlertBannerProps) {
   }
 
   return (
-    <View
-      pointerEvents="box-none"
-      style={[styles.root, { top: insets.top + BANNER_TOP }]}>
+    <View pointerEvents="box-none" style={[styles.root, { top: insets.top + BANNER_TOP }]}>
       <AlertCard variant="banner" onPress={onDismiss} {...alert} />
     </View>
   );

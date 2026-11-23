@@ -48,7 +48,13 @@ describe('Alerta', () => {
 
   it('ventana: oculta el botón secundario si no se indica', async () => {
     await render(
-      <AlertCard variant="dialog" tone="danger" title="Título" message="Mensaje" primaryLabel="Entendido" />,
+      <AlertCard
+        variant="dialog"
+        tone="danger"
+        title="Título"
+        message="Mensaje"
+        primaryLabel="Entendido"
+      />,
     );
 
     expect(screen.getByRole('button', { name: 'Entendido' })).toBeOnTheScreen();
