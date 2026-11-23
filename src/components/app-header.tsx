@@ -28,6 +28,7 @@ export function AppHeader({ stats }: AppHeaderProps) {
             source={images.logoHorizontal}
             style={styles.logo}
             resizeMode="stretch"
+            accessible
             accessibilityRole="image"
             accessibilityLabel="Criterika"
           />

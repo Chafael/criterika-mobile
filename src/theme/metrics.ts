@@ -36,6 +36,25 @@ export const sizes = {
   tabMinWidth: 56,
   tabMinHeight: 44,
   primaryButtonHeight: 52,
+  /** Unit topic circle (1:436). */
+  topicCircle: 44,
+  /** Next-unit icon circle (1:450). */
+  nextUnitCircle: 40,
+  /** Unit progress track (1:445). */
+  progressTrack: 12,
+  /** Completed and locked nodes (1:465, 1:509). */
+  node: 64,
+  /** Active and final nodes (1:486, 1:523). */
+  nodeLarge: 80,
+  /** Mascot next to the active node (1:505). */
+  mascot: 64,
+  /** Speech bubble width (1:501). */
+  bubbleWidth: 120,
+  /** Height of the path illustration (1:459). */
+  pathHeight: 766,
+  /** Sheet drag handle (26:242). */
+  handleWidth: 40,
+  handleHeight: 4,
 } as const;
 
 /**
@@ -51,6 +70,12 @@ export const shadows = {
   card: '0px 1px 2px 0px rgba(0, 0, 0, 0.05)',
   /** Floating elements: nodes, bubbles (1:466). */
   raised: '0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -2px rgba(0, 0, 0, 0.1)',
+  /** Small chips and pills (1:470 drop-shadow). */
+  chip: '0px 1px 1px 0px rgba(0, 0, 0, 0.05)',
+  /** Active node (1:487). */
+  activeNode: '0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -4px rgba(0, 0, 0, 0.1)',
+  /** Mascot (1:505). */
+  mascot: '0px 2px 4px 0px rgba(0, 0, 0, 0.06), 0px 4px 6px 0px rgba(0, 0, 0, 0.07)',
 } as const;
 
 /** Primary button press microinteraction. */
