@@ -44,7 +44,57 @@ export type ColorTokens = {
   gems: string;
   /** Streak icon (1:550). */
   streak: string;
+
+  // ── Level path (1:458) ──────────────────────────────────────────────
+  /** Blurred decoration in the unit card (1:424). */
+  decorGlow: string;
+  /** Icon on the green topic circle (1:438). */
+  onSuccessContainer: string;
+  /** Check icon on completed nodes (1:468). */
+  onSuccess: string;
+  /** Locked node and final card fill (1:509, 1:523). */
+  surfaceLocked: string;
+  /** Translucent label behind locked nodes (1:513). */
+  surfaceLockedLabel: string;
+  /** Text of locked node labels (1:514). */
+  textDisabled: string;
+  /** Lock on the next-unit card (1:457). */
+  lockMuted: string;
+  /** Halo around the active node (1:485). */
+  activeGlow: string;
+  /** Icon and "INICIAR" text on the active node (1:489, 1:492). */
+  onActiveNode: string;
+  /** Pill under the active node (1:494). */
+  activeLabel: string;
+  onActiveLabel: string;
+  /** Play icon in the active pill (1:497). */
+  activeLabelIcon: string;
+  /** Reward badge above the final node (1:518). */
+  reward: string;
+  onReward: string;
+  /** Gift icon on the final card (1:525). */
+  rewardIcon: string;
+  /** Overlay with the lock on the final card (1:528). */
+  rewardLockOverlay: string;
+  /** Mascot speech bubble text (1:503). */
+  bubbleText: string;
+  /** Layer behind the level preview sheet (26:239). */
+  scrim: string;
 };
+
+/**
+ * Level preview sheet (26:240). It only exists in light in Figma,
+ * so it uses the same palette in both appearances.
+ */
+export const sheetColors = {
+  surface: '#FFFDF8',
+  handle: '#E8D3B0',
+  overline: '#5F7230',
+  title: '#4A2418',
+  body: '#70452E',
+  chip: '#F7E9CE',
+  rewardBox: '#FFF4DC',
+} as const;
 
 export const colors: Record<ColorScheme, ColorTokens> = {
   light: {
@@ -68,6 +118,24 @@ export const colors: Record<ColorScheme, ColorTokens> = {
     lives: '#BA1A1A',
     gems: '#FCBC24',
     streak: '#F39A1E',
+    decorGlow: 'rgba(211, 233, 139, 0.3)',
+    onSuccessContainer: '#576A1A',
+    onSuccess: '#FFFDF8',
+    surfaceLocked: '#F3E3C8',
+    surfaceLockedLabel: 'rgba(249, 241, 228, 0.7)',
+    textDisabled: 'rgba(83, 68, 52, 0.8)',
+    lockMuted: '#D9C3AE',
+    activeGlow: 'rgba(243, 154, 30, 0.3)',
+    onActiveNode: '#603800',
+    activeLabel: '#FFDDBB',
+    onActiveLabel: '#2B1700',
+    activeLabelIcon: '#885200',
+    reward: '#FCBC24',
+    onReward: '#261900',
+    rewardIcon: '#7B5800',
+    rewardLockOverlay: 'rgba(235, 211, 176, 0.4)',
+    bubbleText: '#331207',
+    scrim: 'rgba(43, 20, 12, 0.45)',
   },
   dark: {
     background: '#1E130D',
@@ -92,5 +160,24 @@ export const colors: Record<ColorScheme, ColorTokens> = {
     lives: '#FF8A80',
     gems: '#FCBC24',
     streak: '#F39A1E',
+    decorGlow: 'rgba(61, 74, 28, 0.3)',
+    onSuccessContainer: '#C5D88A',
+    onSuccess: '#FFFDF8',
+    surfaceLocked: '#3A2619',
+    surfaceLockedLabel: 'rgba(42, 27, 18, 0.7)',
+    textDisabled: 'rgba(217, 195, 174, 0.8)',
+    lockMuted: '#D9C3AE',
+    activeGlow: 'rgba(243, 154, 30, 0.3)',
+    onActiveNode: '#603800',
+    activeLabel: '#FFDDBB',
+    onActiveLabel: '#2B1700',
+    activeLabelIcon: '#885200',
+    reward: '#FCBC24',
+    onReward: '#261900',
+    rewardIcon: '#F5B51B',
+    rewardLockOverlay: 'rgba(235, 211, 176, 0.4)',
+    bubbleText: '#331207',
+    // The dark frame has no sheet; it keeps the light scrim (26:239).
+    scrim: 'rgba(43, 20, 12, 0.45)',
   },
 };

@@ -1,0 +1,6 @@
+{
+  "svgo": true,
+  "svgoConfig": {
+    "plugins": [{ "name": "removeAttrs", "params": { "attrs": "(style|overflow)" } }]
+  }
+}

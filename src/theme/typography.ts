@@ -46,4 +46,20 @@ export const typography = {
     letterSpacing: 0.33,
     textTransform: 'uppercase',
   },
+  /** Small bold labels — Bold 11/16, +0.33 (1:522, 1:527). */
+  captionBold: { fontFamily: fontFamily.bold, fontSize: 11, lineHeight: 16, letterSpacing: 0.33 },
+  /** Mascot speech bubble — Bold 11/13.75, +0.33 (1:503). */
+  bubble: { fontFamily: fontFamily.bold, fontSize: 11, lineHeight: 13.75, letterSpacing: 0.33 },
+  /** Sheet overline — Bold 12 (26:243). */
+  sheetOverline: { fontFamily: fontFamily.bold, fontSize: 12 },
+  /** Sheet section title — Bold 13 (26:246). */
+  sheetSection: { fontFamily: fontFamily.bold, fontSize: 13 },
+  /** Activity chips — Bold 12 (26:249). */
+  chip: { fontFamily: fontFamily.bold, fontSize: 12 },
+  /** Reward values — Bold 18 (26:260). */
+  rewardValue: { fontFamily: fontFamily.bold, fontSize: 18 },
+  /** Sheet note — Medium 12 (26:262). */
+  sheetNote: { fontFamily: fontFamily.medium, fontSize: 12 },
+  /** Text button — Bold 14 (26:272). */
+  textButton: { fontFamily: fontFamily.bold, fontSize: 14 },
 } as const satisfies Record<string, TypeStyle>;
