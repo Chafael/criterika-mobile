@@ -24,6 +24,8 @@ import ArrowBackThinIcon from '@/assets/icons/arrow-back-thin.svg';
 import ArrowBackSmallIcon from '@/assets/icons/arrow-back-small.svg';
 import ArrowForwardIcon from '@/assets/icons/arrow-forward.svg';
 import CalendarIcon from '@/assets/icons/calendar.svg';
+import ChevronDownIcon from '@/assets/icons/chevron-down.svg';
+import ChevronUpIcon from '@/assets/icons/chevron-up.svg';
 import ClipboardIcon from '@/assets/icons/clipboard.svg';
 import EyeIcon from '@/assets/icons/eye.svg';
 import HistoryIcon from '@/assets/icons/history.svg';
@@ -139,6 +141,12 @@ export const icons = {
   shieldCheck: ShieldCheckIcon,
   /** 1:13 — 14.67 × 14 */
   verified: VerifiedIcon,
+
+  // ── Legal documents (70:1209, 51:1164) ─────────────────────────────
+  /** 70:1312 "icon/expandir" — 12 × 12 */
+  chevronDown: ChevronDownIcon,
+  /** 70:1305 "icon/contraer" — 12 × 12 */
+  chevronUp: ChevronUpIcon,
 } as const;
 
 /** Multi-color illustrations: keep their original Figma colors. */

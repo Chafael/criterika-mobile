@@ -134,6 +134,7 @@ export default function CrearCuenta() {
   };
 
   const goToSignIn = () => router.dismissTo('/inicio-sesion');
+  const toggleTerms = () => update('acceptedTerms', !form.acceptedTerms);
 
   return (
     <AuthScreen overlay={<AlertBanner alert={banner} onDismiss={() => setBanner(null)} />}>
@@ -269,20 +270,37 @@ export default function CrearCuenta() {
           textContentType="newPassword"
         />
 
-        <Pressable
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: form.acceptedTerms }}
-          accessibilityLabel="Acepto los Términos y condiciones de Criterika"
-          onPress={() => update('acceptedTerms', !form.acceptedTerms)}
-          style={styles.terms}>
-          <Checkbox checked={form.acceptedTerms} />
-          <Text style={[authTypography.terms, styles.termsText, { color: authColors.termsText }]}>
-            Acepto los <Text style={styles.inlineLink}>Términos y condiciones</Text> de Criterika.
+        <View style={styles.terms}>
+          <Pressable
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: form.acceptedTerms }}
+            accessibilityLabel="Acepto los Términos y condiciones de Criterika"
+            onPress={toggleTerms}
+            hitSlop={11}>
+            <Checkbox checked={form.acceptedTerms} />
+          </Pressable>
+          <Text
+            onPress={toggleTerms}
+            style={[authTypography.terms, styles.termsText, { color: authColors.termsText }]}>
+            Acepto los{' '}
+            <Text
+              accessibilityRole="link"
+              onPress={() => router.push('/terminos-condiciones')}
+              style={styles.inlineLink}>
+              Términos y condiciones
+            </Text>{' '}
+            de Criterika.
           </Text>
-        </Pressable>
+        </View>
         <Text style={[authTypography.terms, { color: authColors.privacyText }]}>
           Antes de crear tu cuenta, consulta el{' '}
-          <Text style={styles.inlineLink}>Aviso de privacidad</Text>.
+          <Text
+            accessibilityRole="link"
+            onPress={() => router.push('/aviso-privacidad')}
+            style={styles.inlineLink}>
+            Aviso de privacidad
+          </Text>
+          .
         </Text>
 
         <View style={styles.actions}>

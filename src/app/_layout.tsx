@@ -50,6 +50,9 @@ export default function RootLayout() {
         <Stack.Protected guard={session === null}>
           <Stack.Screen name="(auth)" />
         </Stack.Protected>
+        {/* Legal documents: open from "Crear cuenta" (no session) and from "Perfil". */}
+        <Stack.Screen name="terminos-condiciones" />
+        <Stack.Screen name="aviso-privacidad" />
       </Stack>
     </ThemeProvider>
   );

@@ -58,6 +58,10 @@ export const authColors = {
   /** Mascot halos (1:94, 1:323). */
   mascotHalo: 'rgba(255, 184, 104, 0.3)',
   mascotHaloSoft: 'rgba(255, 221, 187, 0.4)',
+  /** Legal section border (70:1302). */
+  sectionBorder: '#F1E2C8',
+  /** Help and contact boxes on the legal screens (70:1379, 70:1157). */
+  surfaceHelp: '#FFF4DC',
 } as const;
 
 /** "Alerta" component (Figma 36:752). It has no dark variant. */
@@ -143,4 +147,19 @@ export const authTypography = {
   bannerTitle: { fontFamily: fontFamily.bold, fontSize: 14 },
   /** Banner message — Medium 13 (36:746). */
   bannerMessage: { fontFamily: fontFamily.medium, fontSize: 13 },
+  /**
+   * Legal screen title — Bold 20, +0.26 (70:1216). Figma sets an 18 px line
+   * height, smaller than the font; 24 avoids clipping and the row is 60 px
+   * tall either way because of the back button.
+   */
+  legalTitle: { fontFamily: fontFamily.bold, fontSize: 20, lineHeight: 24, letterSpacing: 0.26 },
+  /** "Última actualización" — Medium 12, normal line height (70:1300). */
+  legalMeta: { fontFamily: fontFamily.medium, fontSize: 12 },
+  /** Legal paragraphs — Medium 14, line height 1.45 (70:1301, 70:1307). */
+  legalBody: { fontFamily: fontFamily.medium, fontSize: 14, lineHeight: 20.3 },
+  /** Section and help titles — Bold 15, normal line height (70:1304, 70:1380). */
+  legalHeading: { fontFamily: fontFamily.bold, fontSize: 15 },
+  /** Help box lines — 14, line height 1.4 (70:1381, 70:1160). */
+  legalHelpStrong: { fontFamily: fontFamily.bold, fontSize: 14, lineHeight: 19.6 },
+  legalHelp: { fontFamily: fontFamily.medium, fontSize: 14, lineHeight: 19.6 },
 } as const satisfies Record<string, TypeStyle>;
