@@ -18,6 +18,22 @@ async function signInWith(email: string, password: string) {
   return user;
 }
 
+type HostNode = { type: string; children: (HostNode | string)[] | null };
+
+/** Types of every host element in a rendered tree. */
+function hostTypes(node: ReturnType<typeof screen.toJSON>): string[] {
+  if (node === null || typeof node === 'string') {
+    return [];
+  }
+  const nodes = (Array.isArray(node) ? node : [node]) as HostNode[];
+  return nodes.flatMap((item) => [
+    item.type,
+    ...(item.children ?? []).flatMap((child) =>
+      hostTypes(child as ReturnType<typeof screen.toJSON>),
+    ),
+  ]);
+}
+
 describe('Pantalla Inicio de sesión', () => {
   beforeEach(() => {
     resetSessionForTests();
@@ -35,6 +51,12 @@ describe('Pantalla Inicio de sesión', () => {
     expect(
       screen.getByText('Tus datos de aprendizaje están protegidos bajo estándares éticos'),
     ).toBeOnTheScreen();
+  });
+
+  it('queda fija: no usa ScrollView, así que no se puede deslizar', async () => {
+    await render(<InicioSesion />);
+
+    expect(hostTypes(screen.toJSON())).not.toContain('RCTScrollView');
   });
 
   it('con credenciales válidas va al código de acceso', async () => {
