@@ -8,6 +8,7 @@ import { AlertDialog } from '@/components/alert/alert-dialog';
 import { AuthButton } from '@/components/auth/auth-button';
 import { AuthScreen } from '@/components/auth/auth-screen';
 import { TextField } from '@/components/auth/text-field';
+import { registrationEnabled } from '@/data/registration-api';
 import { signIn } from '@/data/session';
 import { icons, images } from '@/media';
 import { authColors, authTypography, radii, shadows, typography } from '@/theme';
@@ -28,6 +29,13 @@ export default function InicioSesion() {
   const [blocked, setBlocked] = useState(false);
 
   const submit = async () => {
+    if (registrationEnabled) {
+      setBanner({
+        title: 'Inicio de sesión en preparación',
+        message: 'Por ahora puedes entrar al terminar el registro de una cuenta nueva.',
+      });
+      return;
+    }
     setBanner(null);
     const result = await signIn(email, password);
     if (result.status === 'invalid-credentials') {

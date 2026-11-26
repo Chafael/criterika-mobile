@@ -9,6 +9,7 @@ import { AuthScreen } from '@/components/auth/auth-screen';
 import { BackButton } from '@/components/auth/back-button';
 import { TextField } from '@/components/auth/text-field';
 import { isValidEmail } from '@/data/access-rules';
+import { registrationEnabled } from '@/data/registration-api';
 import { requestPasswordReset } from '@/data/session';
 import { icons, images } from '@/media';
 import { authColors, authTypography, radii, shadows, typography } from '@/theme';
@@ -30,6 +31,13 @@ export default function RecuperarContrasena() {
   const [banner, setBanner] = useState<AlertContent | null>(null);
 
   const send = async () => {
+    if (registrationEnabled) {
+      setBanner({
+        title: 'Recuperación de contraseña en preparación',
+        message: 'El envío de enlaces para restablecer contraseñas aún no está habilitado.',
+      });
+      return;
+    }
     if (!isValidEmail(email)) {
       setBanner(invalidEmailAlert);
       return;

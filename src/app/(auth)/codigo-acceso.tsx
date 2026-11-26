@@ -1,14 +1,20 @@
 import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AlertBanner } from '@/components/alert/alert-banner';
 import type { AlertContent } from '@/components/alert/alert-card';
 import { AuthButton } from '@/components/auth/auth-button';
 import { AuthScreen } from '@/components/auth/auth-screen';
+import { registrationAlert } from '@/components/auth/registration-alert';
 import { TextField } from '@/components/auth/text-field';
-import { resendAccessCode, verifyAccessCode } from '@/data/session';
+import {
+  createRegistrationKey,
+  RegistrationError,
+  retainRegistrationKey,
+} from '@/data/registration-api';
+import { getPendingRegistration, resendAccessCode, verifyAccessCode } from '@/data/session';
 import { icons, images } from '@/media';
 import { authColors, authTypography, radii, shadows, sizes, typography } from '@/theme';
 
@@ -27,33 +33,109 @@ const expiredCodeAlert: AlertContent = {
 export default function CodigoAcceso() {
   const [code, setCode] = useState('');
   const [banner, setBanner] = useState<AlertContent | null>(null);
+  const [busy, setBusy] = useState<'verify' | 'resend' | null>(null);
+  const inFlight = useRef(false);
+  const verifyKey = useRef<string | undefined>(undefined);
+  const resendKey = useRef<string | undefined>(undefined);
+  const [now, setNow] = useState(() => Date.now());
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [verifyCooldown, setVerifyCooldown] = useState(0);
+  const registration = getPendingRegistration();
+  const resendAt = Math.max(
+    registration ? Date.parse(registration.reenvioDisponibleEn) : 0,
+    resendCooldown,
+  );
+  const secondsUntilResend = Math.max(0, Math.ceil((resendAt - now) / 1000));
+  const waitingToVerify = verifyCooldown > now;
+
+  useEffect(() => {
+    if (!secondsUntilResend && !waitingToVerify) return;
+    const timer = setTimeout(() => setNow(Date.now()), 1000);
+    return () => clearTimeout(timer);
+  }, [now, secondsUntilResend, waitingToVerify]);
+
+  const updateCode = (text: string) => {
+    if (inFlight.current) return;
+    const next = registration ? text.replace(/\D/g, '').slice(0, 6) : text.toUpperCase();
+    if (next !== code) verifyKey.current = undefined;
+    setCode(next);
+  };
 
   const backToSignIn = () => router.dismissTo('/inicio-sesion');
 
   const verify = async () => {
-    if (code.trim() === '') {
+    if (inFlight.current || (registration && Date.now() < verifyCooldown) || !code.trim()) return;
+    if (registration && !/^\d{6}$/.test(code)) {
+      setBanner({
+        tone: 'danger',
+        title: 'Escribe los seis dígitos',
+        message: 'Usa el código del correo de verificación.',
+      });
       return;
     }
+    inFlight.current = true;
+    setBusy('verify');
     setBanner(null);
-    const result = await verifyAccessCode(code);
-    if (result.status === 'expired') {
-      setBanner(expiredCodeAlert);
-    } else if (result.status === 'no-pending') {
-      backToSignIn();
+    try {
+      if (registration) verifyKey.current ??= createRegistrationKey();
+      const result = await verifyAccessCode(code, verifyKey.current);
+      verifyKey.current = undefined;
+      if (result.status === 'expired') {
+        setBanner(expiredCodeAlert);
+      } else if (result.status === 'no-pending') {
+        backToSignIn();
+      }
+    } catch (error) {
+      if (!retainRegistrationKey(error)) verifyKey.current = undefined;
+      if (error instanceof RegistrationError && error.retryAfterSeconds) {
+        const timestamp = Date.now();
+        setNow(timestamp);
+        setVerifyCooldown(timestamp + error.retryAfterSeconds * 1000);
+      }
+      setBanner(registrationAlert(error));
+    } finally {
+      inFlight.current = false;
+      setBusy(null);
     }
   };
 
   const paste = async () => {
     const text = await Clipboard.getStringAsync();
     if (text) {
-      setCode(text.trim().toUpperCase());
+      updateCode(text.trim());
     }
   };
 
   const resend = async () => {
+    if (inFlight.current || Date.now() < resendAt) return;
+    inFlight.current = true;
+    setBusy('resend');
     setBanner(null);
-    setCode('');
-    await resendAccessCode();
+    try {
+      if (registration) resendKey.current ??= createRegistrationKey();
+      await resendAccessCode(resendKey.current);
+      resendKey.current = undefined;
+      verifyKey.current = undefined;
+      setCode('');
+      setNow(Date.now());
+      if (registration) {
+        setBanner({
+          title: 'Enviamos otro código',
+          message: 'Revisa tu correo y usa el código más reciente.',
+        });
+      }
+    } catch (error) {
+      if (!retainRegistrationKey(error)) resendKey.current = undefined;
+      if (error instanceof RegistrationError && error.retryAfterSeconds) {
+        const timestamp = Date.now();
+        setNow(timestamp);
+        setResendCooldown(timestamp + error.retryAfterSeconds * 1000);
+      }
+      setBanner(registrationAlert(error));
+    } finally {
+      inFlight.current = false;
+      setBusy(null);
+    }
   };
 
   return (
@@ -80,7 +162,9 @@ export default function CodigoAcceso() {
           Código de acceso
         </Text>
         <Text style={[authTypography.bodyRelaxed, styles.center, styles.introBody]}>
-          Te enviamos un código a tu correo. Vence en 10 minutos y solo sirve una vez.
+          {registration
+            ? 'Te enviamos un código a tu correo. Vence en 10 minutos y solo sirve una vez.'
+            : 'Modo de prueba. Usa un código de demostración para continuar.'}
         </Text>
       </View>
 
@@ -107,9 +191,11 @@ export default function CodigoAcceso() {
               accessibilityLabel: 'Pegar código desde el portapapeles',
               onPress: paste,
             }}
-            placeholder="EJ. CRT-8492"
+            placeholder={registration ? 'Ej. 123456' : 'EJ. CRT-8492'}
             value={code}
-            onChangeText={(text) => setCode(text.toUpperCase())}
+            onChangeText={updateCode}
+            keyboardType={registration ? 'number-pad' : 'default'}
+            maxLength={registration ? 6 : undefined}
             autoCapitalize="characters"
             autoCorrect={false}
             autoComplete="one-time-code"
@@ -117,7 +203,8 @@ export default function CodigoAcceso() {
             onSubmitEditing={verify}
           />
           <AuthButton
-            label="Verificar"
+            label={busy === 'verify' ? 'Verificando…' : 'Verificar'}
+            disabled={busy !== null || waitingToVerify}
             size="medium"
             height={48}
             elevation="chip"
@@ -142,9 +229,20 @@ export default function CodigoAcceso() {
       </View>
 
       <View style={styles.links}>
-        <Pressable accessibilityRole="button" onPress={resend} style={styles.resend}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: busy !== null || secondsUntilResend > 0 }}
+          disabled={busy !== null || secondsUntilResend > 0}
+          onPress={resend}
+          style={styles.resend}>
           <icons.refresh width={12} height={12} color={authColors.link} />
-          <Text style={[typography.label, { color: authColors.link }]}>Reenviar código</Text>
+          <Text style={[typography.label, { color: authColors.link }]}>
+            {busy === 'resend'
+              ? 'Enviando…'
+              : secondsUntilResend
+                ? `Reenviar código en ${secondsUntilResend} s`
+                : 'Reenviar código'}
+          </Text>
         </Pressable>
         <Pressable accessibilityRole="link" onPress={backToSignIn} style={styles.back}>
           <icons.arrowBackSmall width={10.667} height={10.667} color={authColors.textSecondary} />
