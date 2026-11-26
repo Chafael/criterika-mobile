@@ -148,7 +148,8 @@ function noop() {}
 
 const styles = StyleSheet.create({
   dialog: {
-    width: 326,
+    width: '100%',
+    maxWidth: 326,
     alignItems: 'center',
     gap: 10,
     paddingTop: 16,

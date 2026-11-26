@@ -33,7 +33,7 @@ export function AlertDialog({
       statusBarTranslucent
       onRequestClose={onRequestClose ?? onSecondary ?? onPrimary}>
       <View style={styles.root}>
-        <View accessibilityViewIsModal>
+        <View accessibilityViewIsModal style={styles.card}>
           <AlertCard variant="dialog" onPrimary={onPrimary} onSecondary={onSecondary} {...card} />
         </View>
       </View>
@@ -46,6 +46,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 16,
     backgroundColor: alertColors.scrim,
   },
+  card: { width: '100%', maxWidth: 326 },
 });

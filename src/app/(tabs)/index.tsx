@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
@@ -6,6 +7,7 @@ import { LevelPreviewSheet } from '@/components/level-path/level-preview-sheet';
 import { NextUnitCard } from '@/components/level-path/next-unit-card';
 import { UnitCard } from '@/components/level-path/unit-card';
 import { getUnitProgress, useLevelPath, type Level } from '@/data/level-path';
+import { memoramaDemo } from '@/mocks/memorama';
 import { spacing, useColors } from '@/theme';
 
 /** "06. Camino de niveles" (Figma 1:388) with its level preview (26:78). */
@@ -46,8 +48,12 @@ export default function Niveles() {
         unitNumber={path.unit.number}
         level={selected}
         preview={preview}
-        // Activities are not built yet; starting just closes the preview.
-        onStart={() => setSelected(null)}
+        demo={selected?.id === memoramaDemo.levelId}
+        onStart={() => {
+          if (selected?.id !== memoramaDemo.levelId) return;
+          setSelected(null);
+          router.push({ pathname: '/nivel/[levelId]', params: { levelId: selected.id } });
+        }}
         onClose={() => setSelected(null)}
       />
     </View>

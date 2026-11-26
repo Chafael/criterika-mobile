@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   Animated,
   Easing,
@@ -29,6 +29,7 @@ type PrimaryButtonProps = {
   /** Face height in px (52 by default, 130:2101). */
   height?: number;
   labelStyle?: StyleProp<TextStyle>;
+  trailing?: ReactNode;
 };
 
 /**
@@ -47,9 +48,14 @@ export function PrimaryButton({
   palette,
   height = sizes.primaryButtonHeight,
   labelStyle,
+  trailing,
 }: PrimaryButtonProps) {
   const colors = useColors();
-  const { face, shadow, label: labelColor } = palette ?? {
+  const {
+    face,
+    shadow,
+    label: labelColor,
+  } = palette ?? {
     face: colors.primary,
     shadow: colors.primaryShadow,
     label: colors.onPrimary,
@@ -74,15 +80,11 @@ export function PrimaryButton({
       onPressIn={() => animateTo(pressMotion.depth)}
       onPressOut={() => animateTo(0)}
       style={[styles.root, { height }, style]}>
-      <View
-        style={[styles.layer, styles.shadow, { backgroundColor: shadow }]}
-      />
+      <View style={[styles.layer, styles.shadow, { backgroundColor: shadow }]} />
       <Animated.View
-        style={[
-          styles.layer,
-          { backgroundColor: face, transform: [{ translateY: offset }] },
-        ]}>
+        style={[styles.layer, { backgroundColor: face, transform: [{ translateY: offset }] }]}>
         <Text style={[typography.button, labelStyle, { color: labelColor }]}>{label}</Text>
+        {trailing}
       </Animated.View>
     </Pressable>
   );
@@ -94,6 +96,8 @@ const styles = StyleSheet.create({
   },
   layer: {
     ...StyleSheet.absoluteFill,
+    flexDirection: 'row',
+    gap: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radii.full,

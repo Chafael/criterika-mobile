@@ -10,6 +10,7 @@ type LevelPreviewSheetProps = {
   unitNumber: number;
   level: Level | null;
   preview: LevelPreview | null;
+  demo?: boolean;
   onStart: () => void;
   onClose: () => void;
 };
@@ -20,6 +21,7 @@ export function LevelPreviewSheet({
   unitNumber,
   level,
   preview,
+  demo,
   onStart,
   onClose,
 }: LevelPreviewSheetProps) {
@@ -27,7 +29,12 @@ export function LevelPreviewSheet({
   const insets = useSafeAreaInsets();
 
   return (
-    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}>
       <View style={styles.root}>
         <Pressable
           accessibilityRole="button"
@@ -45,7 +52,9 @@ export function LevelPreviewSheet({
             <Text style={[typography.sheetOverline, { color: sheetColors.overline }]}>
               UNIDAD {unitNumber} · NIVEL {level.number}
             </Text>
-            <Text accessibilityRole="header" style={[typography.headline, { color: sheetColors.title }]}>
+            <Text
+              accessibilityRole="header"
+              style={[typography.headline, { color: sheetColors.title }]}>
               {level.title}
             </Text>
 
@@ -77,6 +86,12 @@ export function LevelPreviewSheet({
             </View>
 
             <PrimaryButton label="Iniciar nivel" onPress={onStart} />
+            {demo ? (
+              <Text style={[typography.sheetNote, { color: sheetColors.body }]}>
+                Prueba disponible: memorama. Las recompensas y el progreso del camino son de
+                ejemplo.
+              </Text>
+            ) : null}
             <Pressable accessibilityRole="button" onPress={onClose} style={styles.secondary}>
               <Text style={[typography.textButton, { color: sheetColors.body }]}>Ahora no</Text>
             </Pressable>
