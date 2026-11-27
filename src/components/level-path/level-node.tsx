@@ -17,7 +17,7 @@ type LevelNodeProps = {
 export function LevelNode({ level, mascotMessage, onStart }: LevelNodeProps) {
   switch (level.status) {
     case 'completed':
-      return <CompletedNode level={level} />;
+      return <CompletedNode level={level} onStart={level.playable ? onStart : undefined} />;
     case 'active':
       return <ActiveNode level={level} mascotMessage={mascotMessage} onStart={onStart} />;
     case 'locked':
@@ -30,13 +30,17 @@ function levelName(level: Level): string {
 }
 
 /** Completed node (1:465) and its label (1:470). */
-function CompletedNode({ level }: { level: Level }) {
+function CompletedNode({ level, onStart }: { level: Level; onStart?: () => void }) {
   const colors = useColors();
 
   return (
-    <View
+    <Pressable
       style={styles.column}
       accessible
+      accessibilityRole={onStart ? 'button' : undefined}
+      accessibilityHint={onStart ? 'Abre la vista previa para practicar.' : undefined}
+      disabled={!onStart}
+      onPress={onStart}
       accessibilityLabel={`Nivel ${level.number}: ${level.title}. Completado con éxito.`}>
       <View style={[styles.node, styles.raised, { backgroundColor: colors.success }]}>
         <icons.check color={colors.onSuccess} />
@@ -48,7 +52,7 @@ function CompletedNode({ level }: { level: Level }) {
           </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -94,10 +98,7 @@ function ActiveNode({
     <View style={styles.column}>
       <View
         pointerEvents="none"
-        style={[
-          styles.halo,
-          { backgroundImage: glowGradient(colors.activeGlow, haloGlowProfile) },
-        ]}
+        style={[styles.halo, { backgroundImage: glowGradient(colors.activeGlow, haloGlowProfile) }]}
       />
       <Pressable
         accessibilityRole="button"
@@ -107,16 +108,24 @@ function ActiveNode({
         style={[styles.nodeLarge, styles.activeShadow, { backgroundColor: colors.primary }]}>
         <icons.play color={colors.onActiveNode} />
         <View style={styles.startMargin}>
-          <Text style={[typography.captionStrong, styles.startText, { color: colors.onActiveNode }]}>
+          <Text
+            style={[typography.captionStrong, styles.startText, { color: colors.onActiveNode }]}>
             Iniciar
           </Text>
         </View>
       </Pressable>
       <View style={styles.labelMargin}>
         <View
-          style={[styles.label, styles.activeLabel, styles.raised, { backgroundColor: colors.activeLabel }]}>
+          style={[
+            styles.label,
+            styles.activeLabel,
+            styles.raised,
+            { backgroundColor: colors.activeLabel },
+          ]}>
           <icons.playCircle color={colors.activeLabelIcon} />
-          <Text style={[typography.label, { color: colors.onActiveLabel }]}>{levelName(level)}</Text>
+          <Text style={[typography.label, { color: colors.onActiveLabel }]}>
+            {levelName(level)}
+          </Text>
         </View>
       </View>
       {mascotMessage ? <MascotBubble message={mascotMessage} /> : null}

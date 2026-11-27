@@ -1,4 +1,6 @@
 import { mockLevelPath } from '@/mocks/level-path';
+import { useDemoProgress } from '@/data/demo-progress';
+import { useSession } from '@/data/session';
 
 export type LevelStatus = 'completed' | 'active' | 'locked';
 
@@ -7,6 +9,8 @@ export type Level = {
   number: number;
   title: string;
   status: LevelStatus;
+  playable?: boolean;
+  final?: boolean;
 };
 
 export type LevelPreview = {
@@ -17,10 +21,12 @@ export type LevelPreview = {
 };
 
 export type UnitClosing = {
+  id: string;
   title: string;
   cardName: string;
   badge: string;
   status: LevelStatus;
+  playable?: boolean;
 };
 
 export type LevelPath = {
@@ -36,13 +42,39 @@ export type LevelPath = {
   previews: LevelPreview[];
 };
 
-/**
- * Level path of the current unit.
- * Returns mock data for now; replace the body with the backend call
- * without changing the screen.
- */
+export const demoClosingId = 'u2-final';
+
+export function findPathLevel(path: LevelPath, id: string) {
+  return (
+    path.levels.find((level) => level.id === id) ??
+    (id === path.closing.id ? toClosingLevel(path) : undefined)
+  );
+}
+
+export function toClosingLevel(path: LevelPath): Level {
+  return { ...path.closing, number: path.levels.length + 1, final: true };
+}
+
+export function useDemoPlayer() {
+  return useSession()?.email ?? '';
+}
+
+/** Apply approvals from the demo session to the sample unit. */
 export function useLevelPath(): LevelPath {
-  return mockLevelPath;
+  const { completed } = useDemoProgress(useDemoPlayer());
+  let canStart = true;
+  const levels = mockLevelPath.levels.map((level): Level => {
+    if (level.status === 'completed' || completed.includes(level.id))
+      return { ...level, status: 'completed' };
+    const next = { ...level, status: canStart ? 'active' : 'locked' } as const;
+    canStart = false;
+    return next;
+  });
+  const closing: UnitClosing = {
+    ...mockLevelPath.closing,
+    status: completed.includes(demoClosingId) ? 'completed' : canStart ? 'active' : 'locked',
+  };
+  return { ...mockLevelPath, levels, closing };
 }
 
 /**

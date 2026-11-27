@@ -1,181 +1,23 @@
-import { Redirect, router, useLocalSearchParams, usePreventRemove } from 'expo-router';
-import { useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Redirect, useLocalSearchParams } from 'expo-router';
 
-import { ActivityHeader } from '@/components/activities/activity-header';
-import { CrosswordGame } from '@/components/activities/crossword-game';
-import { MemoramaGame } from '@/components/activities/memorama-game';
-import { WordSearchGame } from '@/components/activities/word-search-game';
-import { AlertDialog } from '@/components/alert/alert-dialog';
-import { PrimaryButton } from '@/components/primary-button';
-import type { ActivityGameProps, ActivityOutcome } from '@/data/activity';
-import { useLevelPath, type Level } from '@/data/level-path';
-import { images } from '@/media';
-import { memoramaDemo } from '@/mocks/memorama';
-import { colors, radii, sheetColors, spacing, typography } from '@/theme';
-
-const palette = colors.light;
-const successMascot = require('@/assets/images/mascota-riendo.png');
-
-function DemoMemorama(props: ActivityGameProps) {
-  return <MemoramaGame {...props} content={memoramaDemo.content} />;
-}
-
-const activities = [
-  { name: 'Memorama', render: DemoMemorama, maxExecutions: memoramaDemo.content.maxExecutions },
-  { name: 'Sopa de letras', render: WordSearchGame, maxExecutions: 3 },
-  { name: 'Crucigrama', render: CrosswordGame, maxExecutions: 3 },
-];
+import { DemoLevelAttempt } from '@/components/activities/demo-level-attempt';
+import { findPathLevel, useDemoPlayer, useLevelPath } from '@/data/level-path';
 
 export default function LevelScreen() {
   const { levelId } = useLocalSearchParams<{ levelId: string }>();
   const path = useLevelPath();
-  const level = path.levels.find(({ id }) => id === levelId && id === memoramaDemo.levelId);
+  const player = useDemoPlayer();
+  const level = findPathLevel(path, levelId);
+  const preview = path.previews.find((item) => item.levelId === levelId);
 
-  return level ? <DemoAttempt key={level.id} level={level} /> : <Redirect href="/" />;
-}
-
-function DemoAttempt({ level }: { level: Level }) {
-  const { width } = useWindowDimensions();
-  const wide = width >= 800;
-  const [step, setStep] = useState(0);
-  const [execution, setExecution] = useState(1);
-  const [outcome, setOutcome] = useState<ActivityOutcome | null>(null);
-  const [exit, setExit] = useState<{ confirm: () => void } | null>(null);
-  const passed = outcome === 'passed';
-  const activity = activities[step];
-  const Game = activity.render;
-  const next = passed && step + 1 < activities.length;
-  const canRetry = outcome === 'failed' && execution < activity.maxExecutions;
-  const active = outcome === null || next || canRetry;
-
-  const allowExit = usePreventRemove(active, ({ repeat }) => setExit({ confirm: repeat }));
-  const returnToPath = () => router.dismissTo('/');
-  const onExit = () => {
-    if (active) setExit({ confirm: returnToPath });
-    else returnToPath();
-  };
-
+  if (!level?.playable || level.status === 'locked' || !preview) return <Redirect href="/" />;
   return (
-    <SafeAreaView style={styles.root}>
-      <ActivityHeader
-        title={level.title}
-        level={level.number}
-        completed={step + (passed ? 1 : 0)}
-        total={activities.length}
-        wide={wide}
-        onExit={onExit}
-      />
-      <ScrollView
-        key={`${step}:${execution}`}
-        contentContainerStyle={[styles.content, wide && styles.wide]}>
-        <Game
-          index={step + 1}
-          execution={execution}
-          wide={wide}
-          onOutcome={setOutcome}
-        />
-      </ScrollView>
-      {outcome ? (
-        <View
-          style={[styles.result, passed && styles.resultSuccess]}
-          accessibilityLiveRegion="polite">
-          <View style={styles.resultCopy}>
-            <Image
-              source={passed ? successMascot : images.mascotaGuia}
-              resizeMode="contain"
-              style={styles.resultMascot}
-            />
-            <View style={styles.resultText}>
-              <Text
-                accessibilityRole="header"
-                style={[typography.title, passed ? styles.success : styles.title]}>
-                {passed
-                  ? '¡Actividad superada!'
-                  : canRetry
-                    ? 'Vuelve a intentar la actividad'
-                    : 'Actividad no superada'}
-              </Text>
-              <Text style={[typography.body, styles.body]}>
-                {passed
-                  ? next
-                    ? `Terminaste ${activity.name.toLowerCase()}. Sigue con ${activities[step + 1].name.toLowerCase()}.`
-                    : 'Completaste las tres actividades del nivel de prueba.'
-                  : canRetry
-                    ? 'Alcanzaste el límite de errores. Puedes volver a jugar con el tablero reiniciado.'
-                    : 'Se agotaron las ejecuciones de este intento. Puedes volver al camino e iniciar otro.'}
-              </Text>
-            </View>
-          </View>
-          <PrimaryButton
-            label={
-              canRetry ? 'Reintentar actividad' : next ? 'Siguiente actividad' : 'Volver al camino'
-            }
-            palette={
-              passed ? { face: '#5F7230', label: palette.onSuccess, shadow: '#4A5A21' } : undefined
-            }
-            onPress={() => {
-              if (canRetry) {
-                setExecution((current) => current + 1);
-                setOutcome(null);
-              } else if (next) {
-                setStep((current) => current + 1);
-                setExecution(1);
-                setOutcome(null);
-              } else {
-                returnToPath();
-              }
-            }}
-          />
-        </View>
-      ) : null}
-      <AlertDialog
-        visible={exit !== null}
-        title="¿Salir del nivel?"
-        message="Si sales ahora, el intento termina y el avance en este nivel de prueba no se guarda."
-        mascot={images.mascotaSeria}
-        primaryLabel="Seguir jugando"
-        secondaryLabel="Salir del intento"
-        onPrimary={() => setExit(null)}
-        onRequestClose={() => setExit(null)}
-        onSecondary={() => {
-          if (!exit) return;
-          setExit(null);
-          allowExit();
-          exit.confirm();
-        }}
-      />
-    </SafeAreaView>
+    <DemoLevelAttempt
+      key={`${player}:${level.id}`}
+      player={player}
+      level={level}
+      preview={preview}
+      path={path}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: palette.background },
-  content: {
-    width: '100%',
-    maxWidth: 540,
-    alignSelf: 'center',
-    padding: spacing.screen,
-    paddingBottom: spacing.section,
-  },
-  wide: { maxWidth: 1160, paddingTop: spacing.section, paddingHorizontal: spacing.section },
-  result: {
-    width: '100%',
-    maxWidth: 580,
-    alignSelf: 'center',
-    borderTopLeftRadius: radii.xl,
-    borderTopRightRadius: radii.xl,
-    backgroundColor: sheetColors.rewardBox,
-    boxShadow: '0px -4px 16px rgba(43, 20, 12, 0.12)',
-    padding: 20,
-    gap: spacing.screen,
-  },
-  resultSuccess: { backgroundColor: '#ECF1DF' },
-  resultCopy: { flexDirection: 'row', alignItems: 'center', gap: spacing.screen },
-  resultMascot: { width: 72, height: 72 },
-  resultText: { flex: 1 },
-  title: { color: sheetColors.title },
-  success: { color: '#38471C' },
-  body: { color: palette.textSecondary },
-});

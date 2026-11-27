@@ -1,4 +1,5 @@
-import { mockPlayerStats } from '@/mocks/player';
+import { useDemoProgress } from '@/data/demo-progress';
+import { useDemoPlayer } from '@/data/level-path';
 
 export type PlayerStats = {
   lives: number;
@@ -6,11 +7,8 @@ export type PlayerStats = {
   streakDays: number;
 };
 
-/**
- * Player counters shown in the header.
- * Returns mock data for now; replace the body with the backend call
- * without changing the screens that consume it.
- */
+/** Player counters shown in the header. */
 export function usePlayerStats(): PlayerStats {
-  return mockPlayerStats;
+  const { lives, gems, streakDays, active } = useDemoProgress(useDemoPlayer());
+  return { lives: lives - Number(active !== null), gems, streakDays };
 }

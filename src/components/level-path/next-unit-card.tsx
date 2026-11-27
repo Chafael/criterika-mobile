@@ -5,16 +5,17 @@ import { radii, sizes, spacing, typography, useColors } from '@/theme';
 
 type NextUnitCardProps = {
   title: string;
+  unlocked?: boolean;
 };
 
 /** Locked preview of the next unit (Figma 1:448 / 119:1480). */
-export function NextUnitCard({ title }: NextUnitCardProps) {
+export function NextUnitCard({ title, unlocked = false }: NextUnitCardProps) {
   const colors = useColors();
 
   return (
     <View
       accessible
-      accessibilityLabel={`Próxima unidad: ${title}. Bloqueada.`}
+      accessibilityLabel={`Próxima unidad: ${title}. ${unlocked ? 'Desbloqueada.' : 'Bloqueada.'}`}
       style={[styles.card, { backgroundColor: colors.surfaceChip }]}>
       <View style={styles.left}>
         <View style={[styles.circle, { backgroundColor: colors.surfaceCard }]}>
@@ -25,7 +26,11 @@ export function NextUnitCard({ title }: NextUnitCardProps) {
           <Text style={[typography.title, { color: colors.textPrimary }]}>{title}</Text>
         </View>
       </View>
-      <icons.lockLarge color={colors.lockMuted} />
+      {unlocked ? (
+        <icons.check color={colors.textSuccess} />
+      ) : (
+        <icons.lockLarge color={colors.lockMuted} />
+      )}
     </View>
   );
 }
