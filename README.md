@@ -27,10 +27,12 @@ You can start developing by editing the files inside the **src/app** directory. 
 
 ## Probar el nivel y el registro
 
-- Deja `EXPO_PUBLIC_API_URL` vacía para usar las cuentas de prueba de `src/mocks/session.ts`. Desde Niveles, abre **Discriminación algorítmica** y pulsa **Iniciar nivel**. El recorrido pasa por memorama, sopa de letras y crucigrama antes de regresar al camino. Los tableros, el progreso y las recompensas son datos de prueba.
-- En la sopa de letras, toca la letra inicial y final de una palabra horizontal o vertical y pulsa **Comprobar palabra**. En el crucigrama, toca una pista o una casilla, rellena las letras con el teclado del juego y pulsa **Comprobar**. Si agotas las comprobaciones, puedes volver a intentar la actividad.
+- Deja `EXPO_PUBLIC_API_URL` vacía para usar las cuentas de prueba de `src/mocks/session.ts`. En **Niveles**, abre **Discriminación algorítmica** e inicia el nivel. El recorrido incluye memorama, sopa de letras, preguntas, crucigrama y relacionar.
+- Al fallar una ejecución, la actividad vuelve al final de la cola con sus errores reiniciados. Tres fallos en la misma actividad o una salida confirmada consumen la vida reservada. Al aprobar, se libera esa vida y se actualiza el camino.
+- Aprueba los dos niveles pendientes y abre el cierre de **Sesgo Algorítmico e IA** para ver la recompensa de unidad y su carta. Puedes repetir los niveles aprobados como práctica y comprar vidas de demostración cuando se agoten. Los tableros se reutilizan en esta unidad de prueba. Los saldos, cartas y aprobaciones de demostración se conservan en memoria mientras la aplicación está abierta.
 - Para conectar el registro, copia `.env.example` a `.env.local`, asigna a `EXPO_PUBLIC_API_URL` el origen de la API y reinicia Expo. El origen debe ser accesible desde el equipo o celular donde corra la app. La API debe exponer `GET /api/v1/legal/documents/current` y las rutas de inicio, reenvío y verificación bajo `/api/v1/auth/registrations`.
 - La verificación real abre una sesión en memoria durante la ejecución de la app. El acceso con una cuenta existente y la recuperación quedan disponibles con datos de prueba al dejar vacía la URL.
+- La conexión del juego requiere que el backend exponga el camino, la vista previa, el inicio y la consulta de intentos, la ejecución actual, las respuestas, el heartbeat, el abandono y la economía. Estas operaciones están descritas en el contrato OpenAPI. El frontend mantiene el flujo de demostración mientras se publican las rutas. [Contrato de juego](https://github.com/jacalvoag/criterika-backend/blob/develop/docs/openapi/criterika_openapi_v1.yaml)
 
 ## Get a fresh project
 
