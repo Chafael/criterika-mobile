@@ -1,10 +1,10 @@
 import { Image, StyleSheet, View } from 'react-native';
 
-import Glow from '@/assets/icons/activity/reward-card-glow.svg';
-import Ground from '@/assets/icons/activity/reward-card-ground.svg';
-import Left from '@/assets/icons/activity/reward-card-left.svg';
-import Middle from '@/assets/icons/activity/reward-card-middle.svg';
-import Right from '@/assets/icons/activity/reward-card-right.svg';
+import Glow from '@/assets/illustrations/reward-card-glow.svg';
+import Ground from '@/assets/illustrations/reward-card-ground.svg';
+import Left from '@/assets/illustrations/reward-card-left.svg';
+import Middle from '@/assets/illustrations/reward-card-middle.svg';
+import Right from '@/assets/illustrations/reward-card-right.svg';
 import { colors, sheetColors } from '@/theme';
 
 const mascot = require('@/assets/images/reward-card-mascot.png');

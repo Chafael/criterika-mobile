@@ -7,9 +7,9 @@ import Lesson from '@/assets/icons/activity/result-lesson.svg';
 import LifeEmpty from '@/assets/icons/activity/result-life-empty.svg';
 import Life from '@/assets/icons/activity/result-life.svg';
 import Path from '@/assets/icons/activity/result-path.svg';
+import Retry from '@/assets/icons/activity/result-retry.svg';
 import Scales from '@/assets/icons/activity/result-scales.svg';
 import Shop from '@/assets/icons/activity/result-shop.svg';
-import Unit from '@/assets/icons/activity/result-unit.svg';
 import Xp from '@/assets/icons/activity/result-xp.svg';
 import { RewardCardArt } from '@/components/activities/reward-card-art';
 import { PrimaryButton } from '@/components/primary-button';
@@ -66,7 +66,7 @@ export function LevelResultScreen({
   const wide = width >= 800;
   const unitBadge = (
     <View style={styles.badge}>
-      <Unit />
+      <icons.shield color={palette.tabActive} />
       <Text style={[typography.overline, styles.secondaryText]}>
         Unidad {unitNumber} • Nivel {levelNumber}
       </Text>
@@ -89,6 +89,7 @@ export function LevelResultScreen({
             : `Aprobaste las ${result.activities} actividades del nivel ${levelTitle}.`}
         </Text>
         <View style={styles.celebrationArt}>
+          <View style={styles.pedestal} />
           <Image style={styles.celebrationImage} resizeMode="contain" source={celebration} />
         </View>
       </View>
@@ -97,9 +98,14 @@ export function LevelResultScreen({
       <>
         {rewarded ? (
           <View style={styles.rewards}>
-            <Reward icon={<Gems />} color="#FFDEA5" value={result.reward.gems} label="Gemas" />
             <Reward
-              icon={<Xp />}
+              icon={<Gems color={palette.rewardIcon} />}
+              color="#FFDEA5"
+              value={result.reward.gems}
+              label="Gemas"
+            />
+            <Reward
+              icon={<Xp color={palette.success} />}
               color={palette.successContainer}
               value={result.reward.xp}
               label="XP · primera vez"
@@ -131,7 +137,7 @@ export function LevelResultScreen({
         )}
         {result.lesson && (
           <View style={styles.note}>
-            <Lesson />
+            <Lesson color={palette.tabActive} />
             <Text style={[typography.body, styles.secondaryText, styles.flex]}>
               {result.lesson}
             </Text>
@@ -167,7 +173,11 @@ export function LevelResultScreen({
           accessibilityLabel={`${result.lives} de ${result.maximumLives} vidas disponibles`}
           style={styles.hearts}>
           {Array.from({ length: result.maximumLives }, (_, n) =>
-            n < result.lives ? <Life key={n} /> : <LifeEmpty key={n} />,
+            n < result.lives ? (
+              <Life key={n} color="#E5533D" />
+            ) : (
+              <LifeEmpty key={n} color={palette.lockMuted} />
+            ),
           )}
         </View>
       </View>
@@ -177,27 +187,29 @@ export function LevelResultScreen({
         {wide && unitBadge}
         <View style={[styles.note, styles.advice]}>
           <View style={styles.scales}>
-            <Scales />
+            <Scales color={palette.tabActive} />
           </View>
           <View style={styles.flex}>
             <Text style={[typography.label, styles.ink]}>Un error también enseña</Text>
-            <Text style={[typography.body, styles.secondaryText]}>
+            <Text style={[typography.body, styles.adviceCopy, styles.secondaryText]}>
               {noLives
-                ? 'Recupera tu energía para volver a deliberar.'
+                ? 'Los incidentes normativos y sesgos de código conllevan responsabilidad. Recupera tu energía para volver a deliberar.'
                 : 'Repasa los conceptos del nivel en el diccionario antes de volver a intentarlo.'}
             </Text>
           </View>
         </View>
         <PrimaryButton
           label={noLives ? 'Comprar vidas' : 'Reintentar nivel'}
-          leading={noLives ? <Shop /> : <icons.refresh color={palette.onActiveNode} />}
+          leading={
+            noLives ? <Shop color={palette.onActiveNode} /> : <Retry color={palette.onPrimary} />
+          }
           palette={primary}
           onPress={noLives ? onShop : onRetry}
           style={styles.action}
         />
         <PrimaryButton
           label="Volver al camino"
-          leading={<Path />}
+          leading={<Path color={palette.textPrimary} />}
           palette={secondary}
           onPress={onBack}
         />
@@ -288,7 +300,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: spacing.screen,
   },
-  celebrationImage: { width: 158, height: 166 },
+  pedestal: {
+    position: 'absolute',
+    bottom: 4,
+    width: 144,
+    height: 32,
+    borderRadius: radii.full,
+    backgroundColor: 'rgba(240,220,189,0.6)',
+  },
+  celebrationImage: { width: 170, height: 176 },
   heading: {
     ...typography.headline,
     fontSize: 26,
@@ -334,7 +354,8 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     backgroundColor: palette.surfaceChip,
   },
-  advice: { backgroundColor: palette.surfaceCard },
+  advice: { backgroundColor: palette.surfaceCard, minHeight: 104 },
+  adviceCopy: { fontSize: 15, lineHeight: 23 },
   action: { marginTop: 8, marginBottom: 4 },
   badge: {
     alignSelf: 'flex-start',
@@ -357,7 +378,7 @@ const styles = StyleSheet.create({
     minHeight: 318,
     gap: 6,
   },
-  reflective: { width: 126, height: 142, marginBottom: spacing.md },
+  reflective: { width: 176, height: 160, marginBottom: spacing.md },
   hearts: {
     flexDirection: 'row',
     flexWrap: 'wrap',
