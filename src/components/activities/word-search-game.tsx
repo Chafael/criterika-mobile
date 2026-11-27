@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import Search from '@/assets/icons/activity/search-word.svg';
-import Found from '@/assets/icons/activity/found-word.svg';
+import Search from '@/assets/icons/activity/word-search-task.svg';
+import Found from '@/assets/icons/activity/word-found-badge.svg';
 import Done from '@/assets/icons/activity/word-done.svg';
 import Open from '@/assets/icons/activity/word-open.svg';
-import Direction from '@/assets/icons/activity/word-direction.svg';
 import Touch from '@/assets/icons/activity/word-touch.svg';
 import Info from '@/assets/icons/activity/word-info.svg';
-import Book from '@/assets/icons/activity/word-book.svg';
-import Check from '@/assets/icons/activity/word-check.svg';
+import Book from '@/assets/icons/activity/word-definition.svg';
+import Check from '@/assets/icons/activity/word-submit.svg';
 import { PuzzleStatus } from '@/components/activities/puzzle-status';
 import { PrimaryButton } from '@/components/primary-button';
 import type { ActivityOutcome } from '@/data/activity';
@@ -153,7 +152,9 @@ export function WordSearchGame({
                   {solved ? (
                     <Text style={[typography.caption, styles.solved]}>Resuelto</Text>
                   ) : (
-                    <Open color="#D9BE9F" />
+                    <View style={styles.open}>
+                      <Open color="#D9BE9F" />
+                    </View>
                   )}
                 </Pressable>
               );
@@ -205,7 +206,7 @@ export function WordSearchGame({
             ))}
           </View>
           <View style={styles.selection}>
-            {line.length > 1 ? <Direction color="#885100" /> : <Info color="#885100" />}
+            <Info color="#885100" />
             <Text style={[typography.caption, styles.ink]}>
               {start ? `Selección: ${preview}` : 'Selecciona la letra inicial y final.'}
             </Text>
@@ -286,6 +287,7 @@ const styles = StyleSheet.create({
   search: { alignSelf: 'flex-start', padding: 8, borderRadius: 8, backgroundColor: '#F8DFB9' },
   copy: { flex: 1, gap: 5 },
   words: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 6 },
+  open: { marginLeft: 'auto' },
   word: {
     flexBasis: '48%',
     flexGrow: 1,
@@ -334,7 +336,7 @@ const styles = StyleSheet.create({
     gap: 8,
     boxShadow: '0px 2px 4px rgba(43,20,12,0.16)',
   },
-  grid: { width: '100%', maxWidth: 440, alignSelf: 'center', gap: 5 },
+  grid: { width: '100%', maxWidth: 352, alignSelf: 'center', gap: 5 },
   row: { flexDirection: 'row', gap: 5 },
   cell: {
     flex: 1,
