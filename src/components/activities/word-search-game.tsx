@@ -21,7 +21,12 @@ import { colors, radii, spacing, typography } from '@/theme';
 const palette = colors.light;
 const definitions = wordSearch.words;
 
-export function WordSearchGame({ wide, index, execution, onOutcome }: {
+export function WordSearchGame({
+  wide,
+  index,
+  execution,
+  onOutcome,
+}: {
   wide: boolean;
   index: number;
   execution: number;
@@ -34,8 +39,11 @@ export function WordSearchGame({ wide, index, execution, onOutcome }: {
   const [start, end] = selection;
   const line = start ? forwardLine(start, end ?? start) : [];
   const selectedKeys = new Set(line.map(cellKey));
-  const foundKeys = new Set(definitions.flatMap((word) =>
-    found.includes(word.word) ? forwardLine(word.start, word.end).map(cellKey) : []));
+  const foundKeys = new Set(
+    definitions.flatMap((word) =>
+      found.includes(word.word) ? forwardLine(word.start, word.end).map(cellKey) : [],
+    ),
+  );
   const preview = line.map(({ row, col }) => wordSearch.rows[row][col]).join('');
   const complete = found.length === definitions.length;
 
@@ -62,11 +70,12 @@ export function WordSearchGame({ wide, index, execution, onOutcome }: {
       setSelection([]);
     } else {
       setFeedback({
-        message: result.kind === 'duplicate'
-          ? 'Ya encontraste esa palabra.'
-          : result.kind === 'invalid'
-            ? 'Selecciona de izquierda a derecha o de arriba hacia abajo.'
-            : 'La selección no coincide con una palabra objetivo.',
+        message:
+          result.kind === 'duplicate'
+            ? 'Ya encontraste esa palabra.'
+            : result.kind === 'invalid'
+              ? 'Selecciona de izquierda a derecha o de arriba hacia abajo.'
+              : 'La selección no coincide con una palabra objetivo.',
         error: result.kind !== 'duplicate',
       });
     }
@@ -74,10 +83,14 @@ export function WordSearchGame({ wide, index, execution, onOutcome }: {
 
   const definitionCard = (
     <View style={styles.definition}>
-      <View style={styles.book}><Book color="#885100" /></View>
+      <View style={styles.book}>
+        <Book color="#885100" />
+      </View>
       <View style={styles.copy}>
         <Text style={[typography.captionBold, styles.brown]}>CONCEPTO CLAVE</Text>
-        <Text style={[typography.label, styles.ink]}>{definition.word}: {definition.definition}</Text>
+        <Text style={[typography.label, styles.ink]}>
+          {definition.word}: {definition.definition}
+        </Text>
       </View>
     </View>
   );
@@ -91,28 +104,57 @@ export function WordSearchGame({ wide, index, execution, onOutcome }: {
             <Text style={[typography.captionBold, styles.number]}>{index}</Text>
             <Text style={[typography.label, styles.brown]}>SOPA DE LETRAS</Text>
           </View>
-          <View style={[styles.inline, styles.count]}><Found color="#536515" /><Text style={[typography.captionBold, styles.green]}>{found.length} de {definitions.length} halladas</Text></View>
+          <View style={[styles.inline, styles.count]}>
+            <Found color="#536515" />
+            <Text style={[typography.captionBold, styles.green]}>
+              {found.length} de {definitions.length} halladas
+            </Text>
+          </View>
         </View>
         <View style={styles.intro}>
-          <View style={styles.search}><Search color="#885100" /></View>
+          <View style={styles.search}>
+            <Search color="#885100" />
+          </View>
           <View style={styles.copy}>
-            <Text accessibilityRole="header" style={[typography.title, styles.ink]}>Encuentra en la cuadrícula los términos clave sobre sesgo y equidad</Text>
-            <Text style={[typography.body, styles.ink]}>Toca las letras en orden o selecciona la inicial y final para marcar cada concepto ético.</Text>
+            <Text accessibilityRole="header" style={[typography.title, styles.ink]}>
+              Encuentra en la cuadrícula los términos clave sobre sesgo y equidad
+            </Text>
+            <Text style={[typography.body, styles.ink]}>
+              Toca las letras en orden o selecciona la inicial y final para marcar cada concepto
+              ético.
+            </Text>
           </View>
         </View>
         <View>
           <View style={styles.between}>
             <Text style={[typography.captionBold, styles.ink]}>TÉRMINOS OBJETIVO</Text>
-            <Text style={[typography.caption, styles.green]}>Toca una palabra para ver su definición</Text>
+            <Text style={[typography.caption, styles.green]}>
+              Toca una palabra para ver su definición
+            </Text>
           </View>
           <View style={styles.words}>
             {definitions.map((word) => {
               const solved = found.includes(word.word);
               return (
-                <Pressable key={word.word} accessibilityRole="button" accessibilityLabel={`Definición de ${word.word}${solved ? ', resuelta' : ''}`} onPress={() => setDefinition(word)} style={[styles.word, solved && styles.wordDone]}>
-                  {solved ? <Done color="#536515" /> : <Text style={styles.initial}>{word.word[0]}</Text>}
-                  <Text style={[typography.label, styles.ink, solved && styles.strike]}>{word.word}</Text>
-                  {solved ? <Text style={[typography.caption, styles.solved]}>Resuelto</Text> : <Open color="#D9BE9F" />}
+                <Pressable
+                  key={word.word}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Definición de ${word.word}${solved ? ', resuelta' : ''}`}
+                  onPress={() => setDefinition(word)}
+                  style={[styles.word, solved && styles.wordDone]}>
+                  {solved ? (
+                    <Done color="#536515" />
+                  ) : (
+                    <Text style={styles.initial}>{word.word[0]}</Text>
+                  )}
+                  <Text style={[typography.label, styles.ink, solved && styles.strike]}>
+                    {word.word}
+                  </Text>
+                  {solved ? (
+                    <Text style={[typography.caption, styles.solved]}>Resuelto</Text>
+                  ) : (
+                    <Open color="#D9BE9F" />
+                  )}
                 </Pressable>
               );
             })}
@@ -123,7 +165,10 @@ export function WordSearchGame({ wide, index, execution, onOutcome }: {
       <View style={[styles.column, wide && styles.main]}>
         <View style={styles.board}>
           <View style={styles.between}>
-            <View style={styles.inline}><Touch color="#885100" /><Text style={[typography.caption, styles.ink]}>Modo táctil activo</Text></View>
+            <View style={styles.inline}>
+              <Touch color="#885100" />
+              <Text style={[typography.caption, styles.ink]}>Modo táctil activo</Text>
+            </View>
             {preview ? <Text style={[typography.label, styles.preview]}>{preview}</Text> : null}
           </View>
           <View style={styles.grid}>
@@ -134,8 +179,25 @@ export function WordSearchGame({ wide, index, execution, onOutcome }: {
                   const selected = selectedKeys.has(key);
                   const matched = foundKeys.has(key);
                   return (
-                    <Pressable key={col} accessibilityRole="button" accessibilityLabel={`${letter}, fila ${row + 1}, columna ${col + 1}${matched ? ', encontrada' : ''}`} accessibilityState={{ selected, disabled: complete }} disabled={complete} onPress={() => select({ row, col })} style={[styles.cell, matched && styles.cellFound, selected && styles.cellSelected]}>
-                      <Text style={[typography.button, matched && !selected ? styles.green : styles.ink]}>{letter}</Text>
+                    <Pressable
+                      key={col}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${letter}, fila ${row + 1}, columna ${col + 1}${matched ? ', encontrada' : ''}`}
+                      accessibilityState={{ selected, disabled: complete }}
+                      disabled={complete}
+                      onPress={() => select({ row, col })}
+                      style={[
+                        styles.cell,
+                        matched && styles.cellFound,
+                        selected && styles.cellSelected,
+                      ]}>
+                      <Text
+                        style={[
+                          typography.button,
+                          matched && !selected ? styles.green : styles.ink,
+                        ]}>
+                        {letter}
+                      </Text>
                     </Pressable>
                   );
                 })}
@@ -144,13 +206,39 @@ export function WordSearchGame({ wide, index, execution, onOutcome }: {
           </View>
           <View style={styles.selection}>
             {line.length > 1 ? <Direction color="#885100" /> : <Info color="#885100" />}
-            <Text style={[typography.caption, styles.ink]}>{start ? `Selección: ${preview}` : 'Selecciona la letra inicial y final.'}</Text>
-            {start && <Pressable accessibilityRole="button" onPress={() => { setSelection([]); setFeedback({ message: '', error: false }); }} style={styles.clear}><Text style={[typography.captionBold, styles.brown, styles.underline]}>Limpiar</Text></Pressable>}
+            <Text style={[typography.caption, styles.ink]}>
+              {start ? `Selección: ${preview}` : 'Selecciona la letra inicial y final.'}
+            </Text>
+            {start && (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => {
+                  setSelection([]);
+                  setFeedback({ message: '', error: false });
+                }}
+                style={styles.clear}>
+                <Text style={[typography.captionBold, styles.brown, styles.underline]}>
+                  Limpiar
+                </Text>
+              </Pressable>
+            )}
           </View>
         </View>
         {!wide && definitionCard}
-        {feedback.message ? <Text accessibilityLiveRegion="polite" accessibilityRole="alert" style={[typography.body, feedback.error ? styles.error : styles.green]}>{feedback.message}</Text> : null}
-        <PrimaryButton label={complete ? 'Ver resultado' : 'Comprobar palabra'} disabled={!complete && selection.length < 2} onPress={check} leading={<Check color={palette.onPrimary} />} />
+        {feedback.message ? (
+          <Text
+            accessibilityLiveRegion="polite"
+            accessibilityRole="alert"
+            style={[typography.body, feedback.error ? styles.error : styles.green]}>
+            {feedback.message}
+          </Text>
+        ) : null}
+        <PrimaryButton
+          label={complete ? 'Ver resultado' : 'Comprobar palabra'}
+          disabled={!complete && selection.length < 2}
+          onPress={check}
+          leading={<Check color={palette.onPrimary} />}
+        />
       </View>
     </View>
   );
@@ -162,33 +250,116 @@ const styles = StyleSheet.create({
   column: { gap: 14 },
   side: { flex: 2 },
   main: { flex: 3 },
-  between: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 5 },
+  between: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 5,
+  },
   inline: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  count: { backgroundColor: '#EAF1CC', borderRadius: radii.full, paddingHorizontal: 8, paddingVertical: 4 },
-  number: { textAlign: 'center', minWidth: 24, borderRadius: radii.full, backgroundColor: '#F99A16', padding: 4, color: palette.textPrimary },
+  count: {
+    backgroundColor: '#EAF1CC',
+    borderRadius: radii.full,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  number: {
+    textAlign: 'center',
+    minWidth: 24,
+    borderRadius: radii.full,
+    backgroundColor: '#F99A16',
+    padding: 4,
+    color: palette.textPrimary,
+  },
   ink: { color: palette.textPrimary },
   brown: { color: '#885100' },
   green: { color: '#536515' },
   error: { color: '#8E2A1E' },
-  intro: { flexDirection: 'row', gap: 8, backgroundColor: palette.surfaceCard, borderRadius: radii.lg, padding: 15 },
+  intro: {
+    flexDirection: 'row',
+    gap: 8,
+    backgroundColor: palette.surfaceCard,
+    borderRadius: radii.lg,
+    padding: 15,
+  },
   search: { alignSelf: 'flex-start', padding: 8, borderRadius: 8, backgroundColor: '#F8DFB9' },
   copy: { flex: 1, gap: 5 },
   words: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 6 },
-  word: { flexBasis: '48%', flexGrow: 1, flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: 8, backgroundColor: palette.surfaceCard, padding: 6, minHeight: 38 },
+  word: {
+    flexBasis: '48%',
+    flexGrow: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderRadius: 8,
+    backgroundColor: palette.surfaceCard,
+    padding: 6,
+    minHeight: 38,
+  },
   wordDone: { backgroundColor: '#F4E8D0' },
   strike: { textDecorationLine: 'line-through', color: '#6E604D' },
-  initial: { overflow: 'hidden', borderRadius: 16, backgroundColor: '#EEE0CC', color: palette.textPrimary, paddingHorizontal: 5, fontSize: 11 },
-  solved: { paddingHorizontal: 4, borderRadius: 8, backgroundColor: '#D3E98B', color: '#415210', marginLeft: 'auto' },
-  definition: { flexDirection: 'row', gap: 8, borderRadius: radii.lg, backgroundColor: '#F4E8D0', padding: 14 },
-  book: { alignSelf: 'flex-start', backgroundColor: '#F0D18A', borderRadius: radii.full, padding: 6 },
-  board: { padding: 10, backgroundColor: palette.surfaceRaised, borderRadius: radii.lg, gap: 8, boxShadow: '0px 2px 4px rgba(43,20,12,0.16)' },
+  initial: {
+    overflow: 'hidden',
+    borderRadius: 16,
+    backgroundColor: '#EEE0CC',
+    color: palette.textPrimary,
+    paddingHorizontal: 5,
+    fontSize: 11,
+  },
+  solved: {
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: '#D3E98B',
+    color: '#415210',
+    marginLeft: 'auto',
+  },
+  definition: {
+    flexDirection: 'row',
+    gap: 8,
+    borderRadius: radii.lg,
+    backgroundColor: '#F4E8D0',
+    padding: 14,
+  },
+  book: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#F0D18A',
+    borderRadius: radii.full,
+    padding: 6,
+  },
+  board: {
+    padding: 10,
+    backgroundColor: palette.surfaceRaised,
+    borderRadius: radii.lg,
+    gap: 8,
+    boxShadow: '0px 2px 4px rgba(43,20,12,0.16)',
+  },
   grid: { width: '100%', maxWidth: 440, alignSelf: 'center', gap: 5 },
   row: { flexDirection: 'row', gap: 5 },
-  cell: { flex: 1, aspectRatio: 0.9, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: palette.surfaceCard },
+  cell: {
+    flex: 1,
+    aspectRatio: 0.9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    backgroundColor: palette.surfaceCard,
+  },
   cellFound: { backgroundColor: '#DEEEA9' },
   cellSelected: { backgroundColor: '#F99A16' },
-  preview: { color: '#885100', backgroundColor: '#FFF0DF', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-  selection: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, justifyContent: 'center', alignItems: 'center' },
+  preview: {
+    color: '#885100',
+    backgroundColor: '#FFF0DF',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  selection: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   clear: { paddingHorizontal: 3, minHeight: 26, justifyContent: 'center' },
   underline: { textDecorationLine: 'underline' },
 });
