@@ -9,8 +9,8 @@ function TestLayout() {
   return <Stack screenOptions={{ headerShown: false, animation: 'none' }} />;
 }
 
-describe('Nivel de memorama', () => {
-  it('abre un nivel, conserva el tablero al cancelar la salida y regresa al camino al ganar', async () => {
+describe('Nivel de prueba', () => {
+  it('conserva el tablero al cancelar la salida y recorre las tres actividades hasta volver al camino', async () => {
     await renderRouter({ _layout: TestLayout, index: Niveles, 'nivel/[levelId]': LevelScreen });
     const press = (name: string) => fireEvent.press(screen.getByRole('button', { name }));
 
@@ -31,6 +31,27 @@ describe('Nivel de memorama', () => {
     await press('Carta oculta 6');
     await press('Ver resultado');
     expect(screen.getByRole('header', { name: '¡Actividad superada!' })).toBeOnTheScreen();
+    expect(screen.getByText('Nivel 3 · 1 de 3 actividades superadas')).toBeOnTheScreen();
+    await press('Siguiente actividad');
+    for (const [start, end] of [
+      ['D, fila 1, columna 1', 'S, fila 1, columna 5'],
+      ['E, fila 2, columna 2', 'D, fila 8, columna 2'],
+      ['A, fila 4, columna 1', 'R, fila 4, columna 7'],
+      ['S, fila 3, columna 8', 'O, fila 7, columna 8'],
+    ]) {
+      await press(start);
+      await press(end);
+      await press('Comprobar palabra');
+    }
+    await press('Ver resultado');
+    expect(screen.getByText('Nivel 3 · 2 de 3 actividades superadas')).toBeOnTheScreen();
+    await press('Siguiente actividad');
+    for (const letter of 'EQUIDAD') await press(`Letra ${letter}`);
+    await press('Pista 2V, Información para aprender');
+    await press('Casilla fila 2, columna 5, vacía');
+    for (const letter of 'ATOS') await press(`Letra ${letter}`);
+    await press('Comprobar');
+    expect(screen.getByText('Nivel 3 · 3 de 3 actividades superadas')).toBeOnTheScreen();
     await press('Volver al camino');
     expect(screen).toHavePathname('/');
   });
