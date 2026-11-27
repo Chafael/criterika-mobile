@@ -19,6 +19,7 @@ export function QuestionGame({
   execution,
   wide,
   onOutcome,
+  onResetScroll,
 }: ActivityGameProps & { content: QuestionContent }) {
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -143,6 +144,7 @@ export function QuestionGame({
               setIndex(index + 1);
               setSelected(undefined);
               setFeedback(undefined);
+              onResetScroll?.();
             }
           }}
         />

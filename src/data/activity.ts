@@ -6,4 +6,5 @@ export type ActivityGameProps = {
   index: number;
   execution: number;
   onOutcome: (result: ActivityOutcome) => void;
+  onResetScroll?: () => void;
 };

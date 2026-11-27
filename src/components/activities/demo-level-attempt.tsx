@@ -1,6 +1,14 @@
 import { Redirect, router, usePreventRemove } from 'expo-router';
-import { useEffect, useRef, useState, type ComponentType } from 'react';
-import { Image, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useEffect, useRef, useState, type ComponentRef, type ComponentType } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import RecoveryIcon from '@/assets/icons/activity/recovery.svg';
@@ -61,31 +69,36 @@ export function DemoLevelAttempt({
   const progress = useDemoProgress(player);
   const token = useRef<number | null>(null);
   const attached = useRef(false);
+  const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
   const [activityState, setActivityState] = useState(newLevelAttempt);
-  const [started, setStarted] = useState(false);
+  const [started, setStarted] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [finalReward, setFinalReward] = useState<LevelReward | null>(null);
   const [outcome, setOutcome] = useState<ActivityOutcome | null>(null);
   const [exit, setExit] = useState<{ confirm: () => void } | null>(null);
   const [activity] = activityState.pending;
   const Game = activity && games[activity.name];
-  const active = started && !!activity && finalReward === null;
+  const active = started === true && !!activity && finalReward === null;
   const allowExit = usePreventRemove(active, ({ repeat }) => setExit({ confirm: repeat }));
   const returnToPath = () => router.dismissTo('/');
   const goToTab = (tab: '/cartas' | '/tienda') => router.dismissTo(tab);
 
   useEffect(() => {
     attached.current = true;
-    if (token.current === null) {
+    let mounted = true;
+    queueMicrotask(() => {
+      if (!mounted || token.current !== null) return;
       const result = reserveDemoAttempt(player);
       if (result.kind === 'started') {
         token.current = result.id;
         setStarted(true);
       } else {
+        setStarted(false);
         setBusy(result.kind === 'busy');
       }
-    }
+    });
     return () => {
+      mounted = false;
       // Let React's development effect replay reconnect to the same reservation.
       const id = token.current;
       attached.current = false;
@@ -162,7 +175,7 @@ export function DemoLevelAttempt({
       />
     );
   }
-  if (activityState.failure || (!started && progress.lives === 0)) {
+  if (activityState.failure || (started === false && progress.lives === 0)) {
     return (
       <LevelResultScreen
         {...resultProps}
@@ -171,7 +184,7 @@ export function DemoLevelAttempt({
           lives: progress.lives,
           maximumLives: demoMaxLives,
           nextLifeAt: progress.nextLifeAt,
-          started,
+          started: started === true,
         }}
       />
     );
@@ -180,7 +193,11 @@ export function DemoLevelAttempt({
     return (
       <SafeAreaView style={styles.root}>
         <View style={styles.content}>
-          <PrimaryButton label="Iniciar nivel" onPress={restart} />
+          {started === null ? (
+            <ActivityIndicator accessibilityLabel="Preparando el nivel" color={palette.primary} />
+          ) : (
+            <PrimaryButton label="Iniciar nivel" onPress={restart} />
+          )}
         </View>
       </SafeAreaView>
     );
@@ -201,6 +218,7 @@ export function DemoLevelAttempt({
         onExit={() => setExit({ confirm: returnToPath })}
       />
       <ScrollView
+        ref={scroll}
         key={`${activity.name}:${activity.execution}`}
         contentContainerStyle={[styles.content, wide && styles.wide]}>
         {activity.execution > 1 && (
@@ -216,6 +234,7 @@ export function DemoLevelAttempt({
           execution={activity.execution}
           wide={wide}
           onOutcome={onOutcome}
+          onResetScroll={() => scroll.current?.scrollTo({ y: 0, animated: false })}
         />
       </ScrollView>
       {next ? (

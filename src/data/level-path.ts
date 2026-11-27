@@ -62,17 +62,16 @@ export function useDemoPlayer() {
 /** Apply approvals from the demo session to the sample unit. */
 export function useLevelPath(): LevelPath {
   const { completed } = useDemoProgress(useDemoPlayer());
-  let canStart = true;
-  const levels = mockLevelPath.levels.map((level): Level => {
-    if (level.status === 'completed' || completed.includes(level.id))
-      return { ...level, status: 'completed' };
-    const next = { ...level, status: canStart ? 'active' : 'locked' } as const;
-    canStart = false;
-    return next;
+  const isCompleted = (level: Level) =>
+    level.status === 'completed' || completed.includes(level.id);
+  const next = mockLevelPath.levels.findIndex((level) => !isCompleted(level));
+  const levels = mockLevelPath.levels.map((level, index): Level => {
+    if (isCompleted(level)) return { ...level, status: 'completed' };
+    return { ...level, status: index === next ? 'active' : 'locked' };
   });
   const closing: UnitClosing = {
     ...mockLevelPath.closing,
-    status: completed.includes(demoClosingId) ? 'completed' : canStart ? 'active' : 'locked',
+    status: completed.includes(demoClosingId) ? 'completed' : next === -1 ? 'active' : 'locked',
   };
   return { ...mockLevelPath, levels, closing };
 }
