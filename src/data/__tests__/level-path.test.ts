@@ -1,6 +1,7 @@
 import { getUnitProgress, type Level, type UnitClosing } from '@/data/level-path';
 
 const closing: UnitClosing = {
+  id: 'final',
   title: 'Cierre',
   cardName: 'Carta',
   badge: 'Recompensa',

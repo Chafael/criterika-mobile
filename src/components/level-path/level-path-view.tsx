@@ -12,6 +12,7 @@ type LevelPathViewProps = {
   closing: UnitClosing;
   mascotMessage: string;
   onStartLevel: (level: Level) => void;
+  onStartClosing: () => void;
 };
 
 /**
@@ -29,7 +30,13 @@ const SLOTS: ViewStyle[] = [
 const GAP_AFTER = { default: 40, active: 48, closing: spacing.block } as const;
 
 /** Winding path with the unit's level nodes (Figma 1:458). */
-export function LevelPathView({ levels, closing, mascotMessage, onStartLevel }: LevelPathViewProps) {
+export function LevelPathView({
+  levels,
+  closing,
+  mascotMessage,
+  onStartLevel,
+  onStartClosing,
+}: LevelPathViewProps) {
   return (
     <View style={styles.container}>
       <illustrations.levelPath
@@ -54,7 +61,7 @@ export function LevelPathView({ levels, closing, mascotMessage, onStartLevel }: 
         </View>
       ))}
       <View style={[styles.row, styles.center, { paddingBottom: GAP_AFTER.closing }]}>
-        <ClosingNode closing={closing} />
+        <ClosingNode closing={closing} onStart={onStartClosing} />
       </View>
     </View>
   );

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { UnitClosing } from '@/data/level-path';
 import { icons } from '@/media';
@@ -6,17 +6,23 @@ import { radii, shadows, sizes, spacing, typography, useColors } from '@/theme';
 
 type ClosingNodeProps = {
   closing: UnitClosing;
+  onStart?: () => void;
 };
 
 /** Unit closing with collectible card reward (Figma 1:517 / 119:1549). */
-export function ClosingNode({ closing }: ClosingNodeProps) {
+export function ClosingNode({ closing, onStart }: ClosingNodeProps) {
   const colors = useColors();
-  const locked = closing.status !== 'completed';
+  const locked = closing.status === 'locked';
+  const canStart = closing.playable && !locked && !!onStart;
 
   return (
-    <View
+    <Pressable
       style={styles.column}
       accessible
+      accessibilityRole={canStart ? 'button' : undefined}
+      accessibilityHint={canStart ? 'Abre la vista previa del cierre.' : undefined}
+      disabled={!canStart}
+      onPress={onStart}
       accessibilityLabel={`${closing.title}. ${closing.badge}: ${closing.cardName}.${
         locked ? ' Bloqueado hasta completar los niveles anteriores.' : ''
       }`}>
@@ -44,7 +50,7 @@ export function ClosingNode({ closing }: ClosingNodeProps) {
           </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

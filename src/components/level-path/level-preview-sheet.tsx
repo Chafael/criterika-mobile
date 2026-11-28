@@ -63,8 +63,8 @@ export function LevelPreviewSheet({
                 {preview.activities.length} actividades en este nivel
               </Text>
               <View style={styles.chips}>
-                {preview.activities.map((activity) => (
-                  <View key={activity} style={styles.chip}>
+                {preview.activities.map((activity, index) => (
+                  <View key={`${activity}:${index}`} style={styles.chip}>
                     <Text style={[typography.chip, { color: sheetColors.body }]}>{activity}</Text>
                   </View>
                 ))}
@@ -72,24 +72,30 @@ export function LevelPreviewSheet({
             </View>
 
             <View style={styles.rewards}>
-              <View style={styles.rewardValues}>
-                <Text style={[typography.rewardValue, { color: sheetColors.title }]}>
-                  +{preview.rewardGems} gemas
-                </Text>
-                <Text style={[typography.rewardValue, { color: sheetColors.title }]}>
-                  +{preview.rewardXp} XP
-                </Text>
-              </View>
+              {level.status !== 'completed' && (
+                <View style={styles.rewardValues}>
+                  <Text style={[typography.rewardValue, { color: sheetColors.title }]}>
+                    +{preview.rewardGems} gemas
+                  </Text>
+                  <Text style={[typography.rewardValue, { color: sheetColors.title }]}>
+                    +{preview.rewardXp} XP
+                  </Text>
+                </View>
+              )}
               <Text style={[typography.sheetNote, { color: sheetColors.body }]}>
-                Al aprobar el nivel por primera vez.
+                {level.status === 'completed'
+                  ? 'Puedes practicar este nivel. Las recompensas se entregan una vez.'
+                  : 'Al aprobar el nivel por primera vez.'}
               </Text>
             </View>
 
-            <PrimaryButton label="Iniciar nivel" onPress={onStart} />
+            <PrimaryButton
+              label={level.status === 'completed' ? 'Practicar nivel' : 'Iniciar nivel'}
+              onPress={onStart}
+            />
             {demo ? (
               <Text style={[typography.sheetNote, { color: sheetColors.body }]}>
-                Puedes probar memorama, sopa de letras y crucigrama. Las recompensas y el progreso
-                del camino son de ejemplo.
+                Nivel de demostración. El progreso y las recompensas se guardan durante esta sesión.
               </Text>
             ) : null}
             <Pressable accessibilityRole="button" onPress={onClose} style={styles.secondary}>

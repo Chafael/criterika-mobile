@@ -1,4 +1,5 @@
 import type { LevelPath } from '@/data/level-path';
+import { levelActivityNames } from '@/data/level-attempt';
 
 /** Sample content shown in Figma 1:388 and 26:78 until the API is wired. */
 export const mockLevelPath: LevelPath = {
@@ -10,23 +11,39 @@ export const mockLevelPath: LevelPath = {
   levels: [
     { id: 'u2-n1', number: 1, title: 'Qué es un sesgo', status: 'completed' },
     { id: 'u2-n2', number: 2, title: 'Datos representativos', status: 'completed' },
-    { id: 'u2-n3', number: 3, title: 'Discriminación algorítmica', status: 'active' },
-    { id: 'u2-n4', number: 4, title: 'Transparencia y explicabilidad', status: 'locked' },
+    {
+      id: 'u2-n3',
+      number: 3,
+      title: 'Discriminación algorítmica',
+      status: 'active',
+      playable: true,
+    },
+    {
+      id: 'u2-n4',
+      number: 4,
+      title: 'Transparencia y explicabilidad',
+      status: 'locked',
+      playable: true,
+    },
   ],
   closing: {
+    id: 'u2-final',
     title: 'Cierre: Equidad algorítmica',
-    cardName: 'Carta Ética',
+    cardName: 'Equidad algorítmica',
     badge: 'Recompensa',
     status: 'locked',
+    playable: true,
   },
   nextUnitTitle: 'Propiedad intelectual',
   mascotMessage: '¡Vamos a reflexionar juntos!',
   previews: [
     {
       levelId: 'u2-n3',
-      activities: ['Memorama', 'Sopa de letras', 'Preguntas', 'Crucigrama', 'Relacionar'],
+      activities: [...levelActivityNames],
       rewardGems: 150,
       rewardXp: 100,
     },
+    { levelId: 'u2-n4', activities: [...levelActivityNames], rewardGems: 150, rewardXp: 100 },
+    { levelId: 'u2-final', activities: [...levelActivityNames], rewardGems: 300, rewardXp: 250 },
   ],
 };

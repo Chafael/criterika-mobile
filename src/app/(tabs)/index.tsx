@@ -6,8 +6,7 @@ import { LevelPathView } from '@/components/level-path/level-path-view';
 import { LevelPreviewSheet } from '@/components/level-path/level-preview-sheet';
 import { NextUnitCard } from '@/components/level-path/next-unit-card';
 import { UnitCard } from '@/components/level-path/unit-card';
-import { getUnitProgress, useLevelPath, type Level } from '@/data/level-path';
-import { memoramaDemo } from '@/mocks/memorama';
+import { getUnitProgress, toClosingLevel, useLevelPath, type Level } from '@/data/level-path';
 import { spacing, useColors } from '@/theme';
 
 /** "06. Camino de niveles" (Figma 1:388) with its level preview (26:78). */
@@ -37,9 +36,10 @@ export default function Niveles() {
           closing={path.closing}
           mascotMessage={path.mascotMessage}
           onStartLevel={setSelected}
+          onStartClosing={() => setSelected(toClosingLevel(path))}
         />
         <View style={styles.nextMargin}>
-          <NextUnitCard title={path.nextUnitTitle} />
+          <NextUnitCard title={path.nextUnitTitle} unlocked={path.closing.status === 'completed'} />
         </View>
       </ScrollView>
 
@@ -48,9 +48,9 @@ export default function Niveles() {
         unitNumber={path.unit.number}
         level={selected}
         preview={preview}
-        demo={selected?.id === memoramaDemo.levelId}
+        demo={selected?.playable}
         onStart={() => {
-          if (selected?.id !== memoramaDemo.levelId) return;
+          if (!selected?.playable || selected.status === 'locked') return;
           setSelected(null);
           router.push({ pathname: '/nivel/[levelId]', params: { levelId: selected.id } });
         }}
