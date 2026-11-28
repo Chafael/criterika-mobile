@@ -30,6 +30,8 @@ type PrimaryButtonProps = {
   height?: number;
   labelStyle?: StyleProp<TextStyle>;
   trailing?: ReactNode;
+  leading?: ReactNode;
+  disabled?: boolean;
 };
 
 /**
@@ -49,6 +51,8 @@ export function PrimaryButton({
   height = sizes.primaryButtonHeight,
   labelStyle,
   trailing,
+  leading,
+  disabled = false,
 }: PrimaryButtonProps) {
   const colors = useColors();
   const {
@@ -76,13 +80,16 @@ export function PrimaryButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onPress}
       onPressIn={() => animateTo(pressMotion.depth)}
       onPressOut={() => animateTo(0)}
-      style={[styles.root, { height }, style]}>
+      style={[styles.root, { height }, disabled && styles.disabled, style]}>
       <View style={[styles.layer, styles.shadow, { backgroundColor: shadow }]} />
       <Animated.View
         style={[styles.layer, { backgroundColor: face, transform: [{ translateY: offset }] }]}>
+        {leading}
         <Text style={[typography.button, labelStyle, { color: labelColor }]}>{label}</Text>
         {trailing}
       </Animated.View>
@@ -94,6 +101,7 @@ const styles = StyleSheet.create({
   root: {
     width: '100%',
   },
+  disabled: { opacity: 0.55 },
   layer: {
     ...StyleSheet.absoluteFill,
     flexDirection: 'row',

@@ -88,8 +88,8 @@ export function LevelPreviewSheet({
             <PrimaryButton label="Iniciar nivel" onPress={onStart} />
             {demo ? (
               <Text style={[typography.sheetNote, { color: sheetColors.body }]}>
-                Prueba disponible: memorama. Las recompensas y el progreso del camino son de
-                ejemplo.
+                Puedes probar memorama, sopa de letras y crucigrama. Las recompensas y el progreso
+                del camino son de ejemplo.
               </Text>
             ) : null}
             <Pressable accessibilityRole="button" onPress={onClose} style={styles.secondary}>

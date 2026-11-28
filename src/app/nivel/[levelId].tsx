@@ -4,10 +4,12 @@ import { Image, ScrollView, StyleSheet, Text, useWindowDimensions, View } from '
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActivityHeader } from '@/components/activities/activity-header';
+import { CrosswordGame } from '@/components/activities/crossword-game';
 import { MemoramaGame } from '@/components/activities/memorama-game';
+import { WordSearchGame } from '@/components/activities/word-search-game';
 import { AlertDialog } from '@/components/alert/alert-dialog';
 import { PrimaryButton } from '@/components/primary-button';
-import type { ActivityOutcome } from '@/data/activity';
+import type { ActivityGameProps, ActivityOutcome } from '@/data/activity';
 import { useLevelPath, type Level } from '@/data/level-path';
 import { images } from '@/media';
 import { memoramaDemo } from '@/mocks/memorama';
@@ -15,6 +17,16 @@ import { colors, radii, sheetColors, spacing, typography } from '@/theme';
 
 const palette = colors.light;
 const successMascot = require('@/assets/images/mascota-riendo.png');
+
+function DemoMemorama(props: ActivityGameProps) {
+  return <MemoramaGame {...props} content={memoramaDemo.content} />;
+}
+
+const activities = [
+  { name: 'Memorama', render: DemoMemorama, maxExecutions: memoramaDemo.content.maxExecutions },
+  { name: 'Sopa de letras', render: WordSearchGame, maxExecutions: 3 },
+  { name: 'Crucigrama', render: CrosswordGame, maxExecutions: 3 },
+];
 
 export default function LevelScreen() {
   const { levelId } = useLocalSearchParams<{ levelId: string }>();
@@ -27,13 +39,16 @@ export default function LevelScreen() {
 function DemoAttempt({ level }: { level: Level }) {
   const { width } = useWindowDimensions();
   const wide = width >= 800;
+  const [step, setStep] = useState(0);
   const [execution, setExecution] = useState(1);
   const [outcome, setOutcome] = useState<ActivityOutcome | null>(null);
   const [exit, setExit] = useState<{ confirm: () => void } | null>(null);
-  const content = memoramaDemo.content;
   const passed = outcome === 'passed';
-  const canRetry = outcome === 'failed' && execution < content.maxExecutions;
-  const active = !passed && (outcome === null || canRetry);
+  const activity = activities[step];
+  const Game = activity.render;
+  const next = passed && step + 1 < activities.length;
+  const canRetry = outcome === 'failed' && execution < activity.maxExecutions;
+  const active = outcome === null || next || canRetry;
 
   const allowExit = usePreventRemove(active, ({ repeat }) => setExit({ confirm: repeat }));
   const returnToPath = () => router.dismissTo('/');
@@ -47,15 +62,16 @@ function DemoAttempt({ level }: { level: Level }) {
       <ActivityHeader
         title={level.title}
         level={level.number}
-        completed={passed ? 1 : 0}
-        total={1}
+        completed={step + (passed ? 1 : 0)}
+        total={activities.length}
         wide={wide}
         onExit={onExit}
       />
-      <ScrollView contentContainerStyle={[styles.content, wide && styles.wide]}>
-        <MemoramaGame
-          key={execution}
-          content={content}
+      <ScrollView
+        key={`${step}:${execution}`}
+        contentContainerStyle={[styles.content, wide && styles.wide]}>
+        <Game
+          index={step + 1}
           execution={execution}
           wide={wide}
           onOutcome={setOutcome}
@@ -78,12 +94,14 @@ function DemoAttempt({ level }: { level: Level }) {
                 {passed
                   ? '¡Actividad superada!'
                   : canRetry
-                    ? 'Vuelve a intentar el memorama'
+                    ? 'Vuelve a intentar la actividad'
                     : 'Actividad no superada'}
               </Text>
               <Text style={[typography.body, styles.body]}>
                 {passed
-                  ? 'Encontraste todos los pares y completaste el nivel de prueba.'
+                  ? next
+                    ? `Terminaste ${activity.name.toLowerCase()}. Sigue con ${activities[step + 1].name.toLowerCase()}.`
+                    : 'Completaste las tres actividades del nivel de prueba.'
                   : canRetry
                     ? 'Alcanzaste el límite de errores. Puedes volver a jugar con el tablero reiniciado.'
                     : 'Se agotaron las ejecuciones de este intento. Puedes volver al camino e iniciar otro.'}
@@ -91,13 +109,19 @@ function DemoAttempt({ level }: { level: Level }) {
             </View>
           </View>
           <PrimaryButton
-            label={canRetry ? 'Reintentar actividad' : 'Volver al camino'}
+            label={
+              canRetry ? 'Reintentar actividad' : next ? 'Siguiente actividad' : 'Volver al camino'
+            }
             palette={
               passed ? { face: '#5F7230', label: palette.onSuccess, shadow: '#4A5A21' } : undefined
             }
             onPress={() => {
               if (canRetry) {
                 setExecution((current) => current + 1);
+                setOutcome(null);
+              } else if (next) {
+                setStep((current) => current + 1);
+                setExecution(1);
                 setOutcome(null);
               } else {
                 returnToPath();
