@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AlertBanner } from '@/components/alert/alert-banner';
 import type { AlertContent } from '@/components/alert/alert-card';
@@ -9,6 +9,8 @@ import { AuthScreen } from '@/components/auth/auth-screen';
 import { BackButton } from '@/components/auth/back-button';
 import { Checkbox } from '@/components/auth/checkbox';
 import { PasswordRequirements } from '@/components/auth/password-requirements';
+import { registrationAlert } from '@/components/auth/registration-alert';
+import { emptyConsent, RegistrationConsent } from '@/components/auth/registration-consent';
 import { TextField, type TextFieldProps } from '@/components/auth/text-field';
 import {
   formatBirthDateInput,
@@ -16,7 +18,16 @@ import {
   isStrongPassword,
   isValidEmail,
   parseBirthDate,
+  registrationPasswordRequirement,
 } from '@/data/access-rules';
+import {
+  createRegistrationKey,
+  getRegistrationDocuments,
+  registrationEnabled,
+  RegistrationError,
+  retainRegistrationKey,
+  type RegistrationDocuments,
+} from '@/data/registration-api';
 import { register } from '@/data/session';
 import { icons, images } from '@/media';
 import { authColors, authTypography, radii, shadows, typography } from '@/theme';
@@ -75,11 +86,16 @@ function validate(form: Form): AlertContent | null {
       message: 'Escribe un correo válido, como tu.correo@ejemplo.com.',
     };
   }
-  if (!isStrongPassword(form.password)) {
+  const validPassword = registrationEnabled
+    ? registrationPasswordRequirement.isMet(form.password)
+    : isStrongPassword(form.password);
+  if (!validPassword) {
     return {
       tone: 'danger',
       title: 'Tu contraseña aún no es segura',
-      message: 'Cumple los 4 requisitos de seguridad.',
+      message: registrationEnabled
+        ? 'Escribe una contraseña de entre 12 y 128 caracteres.'
+        : 'Cumple los 4 requisitos de seguridad.',
     };
   }
   if (form.password !== form.confirmation) {
@@ -89,7 +105,7 @@ function validate(form: Form): AlertContent | null {
       message: 'Escribe la misma contraseña en los dos campos.',
     };
   }
-  if (!form.acceptedTerms) {
+  if (!registrationEnabled && !form.acceptedTerms) {
     return {
       tone: 'danger',
       title: 'Acepta los Términos y condiciones',
@@ -112,25 +128,104 @@ export default function CrearCuenta() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [banner, setBanner] = useState<AlertContent | null>(null);
+  const [documents, setDocuments] = useState<RegistrationDocuments | null>(null);
+  const [consent, setConsent] = useState(emptyConsent);
+  const [documentError, setDocumentError] = useState(false);
+  const [reload, setReload] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
+  const requestKey = useRef<string | undefined>(undefined);
 
-  const update = <K extends keyof Form>(key: K, value: Form[K]) =>
+  useEffect(() => {
+    if (!registrationEnabled) return;
+    let current = true;
+    getRegistrationDocuments().then(
+      (next) => {
+        if (current) setDocuments(next);
+      },
+      () => {
+        if (current) setDocumentError(true);
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [reload]);
+
+  const reloadDocuments = () => {
+    requestKey.current = undefined;
+    setDocuments(null);
+    setConsent(emptyConsent);
+    setDocumentError(false);
+    setReload((version) => version + 1);
+  };
+
+  const update = <K extends keyof Form>(key: K, value: Form[K]) => {
+    if (submittingRef.current) return;
+    requestKey.current = undefined;
     setForm((current) => ({ ...current, [key]: value }));
+  };
 
   const submit = async () => {
+    if (submittingRef.current) return;
     const problem = validate(form);
     setBanner(problem);
     const birthDate = parseBirthDate(form.birthDate);
     if (problem || !birthDate) {
       return;
     }
-    await register({
-      firstName: form.firstName,
-      lastName: form.lastName,
-      birthDate,
-      email: form.email,
-      password: form.password,
-    });
-    router.push('/codigo-acceso');
+    if (registrationEnabled && !documents) return;
+    if (
+      documents &&
+      (!consent.terms ||
+        !consent.privacy ||
+        documents.avisoPrivacidad.finalidades.some(
+          ({ id, necesaria }) => necesaria && !consent.purposes.includes(id),
+        ))
+    ) {
+      setBanner({
+        tone: 'danger',
+        title: 'Completa las aceptaciones requeridas',
+        message: 'Acepta los términos, reconoce el aviso y selecciona las finalidades necesarias.',
+      });
+      return;
+    }
+
+    submittingRef.current = true;
+    setSubmitting(true);
+    try {
+      if (documents) requestKey.current ??= createRegistrationKey();
+      await register(
+        {
+          firstName: form.firstName,
+          lastName: form.lastName,
+          birthDate,
+          email: form.email,
+          password: form.password,
+        },
+        documents
+          ? {
+              terminosVersionId: documents.terminos.id,
+              avisoVersionId: documents.avisoPrivacidad.id,
+              aceptaTerminos: true,
+              reconoceAvisoPresentado: true,
+              consienteFinalidadesIds: consent.purposes,
+            }
+          : undefined,
+        requestKey.current,
+      );
+      requestKey.current = undefined;
+      setForm((current) => ({ ...current, password: '', confirmation: '' }));
+      router.push('/codigo-acceso');
+    } catch (error) {
+      if (!retainRegistrationKey(error)) requestKey.current = undefined;
+      if (error instanceof RegistrationError && error.code === 'LEGAL_VERSION_OUTDATED')
+        reloadDocuments();
+      setBanner(registrationAlert(error));
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
   };
 
   const goToSignIn = () => router.dismissTo('/inicio-sesion');
@@ -244,7 +339,10 @@ export default function CrearCuenta() {
           autoCapitalize="none"
           autoComplete="new-password"
           textContentType="newPassword">
-          <PasswordRequirements password={form.password} />
+          <PasswordRequirements
+            password={form.password}
+            requirements={registrationEnabled ? [registrationPasswordRequirement] : undefined}
+          />
         </TextField>
         <TextField
           {...fieldBase}
@@ -269,25 +367,57 @@ export default function CrearCuenta() {
           textContentType="newPassword"
         />
 
-        <Pressable
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: form.acceptedTerms }}
-          accessibilityLabel="Acepto los Términos y condiciones de Criterika"
-          onPress={() => update('acceptedTerms', !form.acceptedTerms)}
-          style={styles.terms}>
-          <Checkbox checked={form.acceptedTerms} />
-          <Text style={[authTypography.terms, styles.termsText, { color: authColors.termsText }]}>
-            Acepto los <Text style={styles.inlineLink}>Términos y condiciones</Text> de Criterika.
-          </Text>
-        </Pressable>
-        <Text style={[authTypography.terms, { color: authColors.privacyText }]}>
-          Antes de crear tu cuenta, consulta el{' '}
-          <Text style={styles.inlineLink}>Aviso de privacidad</Text>.
-        </Text>
+        {registrationEnabled ? (
+          documents ? (
+            <RegistrationConsent
+              documents={documents}
+              selection={consent}
+              onChange={(selection) => {
+                if (submittingRef.current) return;
+                requestKey.current = undefined;
+                setConsent(selection);
+              }}
+            />
+          ) : documentError ? (
+            <Pressable accessibilityRole="button" onPress={reloadDocuments} style={styles.signIn}>
+              <Text style={[typography.label, { color: authColors.linkStrong }]}>
+                No se pudieron cargar los documentos. Reintentar
+              </Text>
+            </Pressable>
+          ) : (
+            <View accessible accessibilityLabel="Cargando documentos vigentes" style={styles.terms}>
+              <ActivityIndicator color={authColors.linkStrong} />
+              <Text style={[typography.body, { color: authColors.privacyText }]}>
+                Cargando documentos vigentes…
+              </Text>
+            </View>
+          )
+        ) : (
+          <>
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: form.acceptedTerms }}
+              accessibilityLabel="Acepto los Términos y condiciones de Criterika"
+              onPress={() => update('acceptedTerms', !form.acceptedTerms)}
+              style={styles.terms}>
+              <Checkbox checked={form.acceptedTerms} />
+              <Text
+                style={[authTypography.terms, styles.termsText, { color: authColors.termsText }]}>
+                Acepto los <Text style={styles.inlineLink}>Términos y condiciones</Text> de
+                Criterika.
+              </Text>
+            </Pressable>
+            <Text style={[authTypography.terms, { color: authColors.privacyText }]}>
+              Antes de crear tu cuenta, consulta el{' '}
+              <Text style={styles.inlineLink}>Aviso de privacidad</Text>.
+            </Text>
+          </>
+        )}
 
         <View style={styles.actions}>
           <AuthButton
-            label="Crear cuenta"
+            label={submitting ? 'Enviando…' : 'Crear cuenta'}
+            disabled={submitting || (registrationEnabled && documents === null)}
             size="medium"
             height={50}
             icon={{ Icon: icons.personCheck, width: 18.333, height: 15.033 }}

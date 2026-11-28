@@ -35,6 +35,16 @@ export const passwordRequirements: readonly PasswordRequirement[] = [
   },
 ];
 
+/** Registration API validates the exact Unicode length of the original password. */
+export const registrationPasswordRequirement: PasswordRequirement = {
+  id: 'length',
+  label: 'Entre 12 y 128 caracteres',
+  isMet: (password) => {
+    const length = Array.from(password).length;
+    return length >= 12 && length <= 128;
+  },
+};
+
 export function countMetRequirements(password: string): number {
   return passwordRequirements.filter((requirement) => requirement.isMet(password)).length;
 }

@@ -1,10 +1,22 @@
 import { useSyncExternalStore } from 'react';
 
+import {
+  createRegistrationKey,
+  registrationEnabled,
+  RegistrationError,
+  resendRegistration,
+  startRegistration,
+  verifyRegistration,
+  type RegistrationAcceptance,
+  type RegistrationChallenge,
+  type RegistrationSession,
+} from '@/data/registration-api';
 import { mockAccounts, mockExpiredCode, type MockAccount } from '@/mocks/session';
 
 export type Session = {
   email: string;
   firstName: string;
+  backend?: RegistrationSession;
 };
 
 export type SignInResult =
@@ -34,7 +46,10 @@ export type RegisterResult = { status: 'code-sent'; email: string };
 let accounts: MockAccount[] = [...mockAccounts];
 let session: Session | null = null;
 /** Account waiting for its access code (after sign in or sign up). */
-let pending: MockAccount | null = null;
+let pending:
+  | { kind: 'demo'; account: MockAccount }
+  | { kind: 'registration'; challenge: RegistrationChallenge }
+  | null = null;
 /** Email that asked for a password reset. */
 let resetEmail: string | null = null;
 
@@ -72,6 +87,7 @@ export function useSession(): Session | null {
 
 /** Checks the credentials and, when valid, sends an access code to the email. */
 export async function signIn(email: string, password: string): Promise<SignInResult> {
+  if (registrationEnabled) return { status: 'invalid-credentials' };
   const account = findAccount(email);
   if (account?.status === 'blocked') {
     return { status: 'blocked' };
@@ -79,12 +95,23 @@ export async function signIn(email: string, password: string): Promise<SignInRes
   if (!account || account.password !== password) {
     return { status: 'invalid-credentials' };
   }
-  pending = account;
+  pending = { kind: 'demo', account };
   return { status: 'code-sent', email: account.email };
 }
 
 /** Creates the account and sends an access code to verify the email. */
-export async function register(input: RegisterInput): Promise<RegisterResult> {
+export async function register(
+  input: RegisterInput,
+  acceptance?: RegistrationAcceptance,
+  key?: string,
+): Promise<RegisterResult> {
+  if (registrationEnabled) {
+    if (!acceptance) throw new RegistrationError('VALIDATION_FAILED');
+    const challenge = await startRegistration(input, acceptance, key ?? createRegistrationKey());
+    pending = { kind: 'registration', challenge };
+    return { status: 'code-sent', email: normalizeEmail(input.email) };
+  }
+
   const account: MockAccount = {
     email: normalizeEmail(input.email),
     password: input.password,
@@ -92,29 +119,51 @@ export async function register(input: RegisterInput): Promise<RegisterResult> {
     status: 'active',
   };
   accounts = [...accounts.filter((item) => item.email !== account.email), account];
-  pending = account;
+  pending = { kind: 'demo', account };
   return { status: 'code-sent', email: account.email };
 }
 
 /** Verifies the access code. On success the session starts. */
-export async function verifyAccessCode(code: string): Promise<VerifyCodeResult> {
+export async function verifyAccessCode(code: string, key?: string): Promise<VerifyCodeResult> {
   if (!pending) {
     return { status: 'no-pending' };
+  }
+  if (pending.kind === 'registration') {
+    const current = pending;
+    const backend = await verifyRegistration(
+      current.challenge.id,
+      code.trim(),
+      key ?? createRegistrationKey(),
+    );
+    if (pending !== current) return { status: 'no-pending' };
+    pending = null;
+    setSession({ email: backend.usuario.correo, firstName: backend.usuario.nombre, backend });
+    return { status: 'verified' };
   }
   if (code.trim().toUpperCase() === mockExpiredCode) {
     return { status: 'expired' };
   }
-  const { email, firstName } = pending;
+  const { email, firstName } = pending.account;
   pending = null;
   setSession({ email, firstName });
   return { status: 'verified' };
 }
 
 /** Sends a new access code to the pending account. */
-export async function resendAccessCode(): Promise<void> {}
+export function getPendingRegistration(): RegistrationChallenge | null {
+  return pending?.kind === 'registration' ? pending.challenge : null;
+}
+
+export async function resendAccessCode(key?: string): Promise<void> {
+  if (pending?.kind !== 'registration') return;
+  const current = pending;
+  const challenge = await resendRegistration(current.challenge.id, key ?? createRegistrationKey());
+  if (pending === current) pending = { kind: 'registration', challenge };
+}
 
 /** Sends a one-time reset link (valid for 10 minutes) to the email. */
 export async function requestPasswordReset(email: string): Promise<void> {
+  if (registrationEnabled) return;
   resetEmail = normalizeEmail(email);
 }
 
@@ -130,6 +179,7 @@ export async function resetPassword(password: string): Promise<void> {
 }
 
 export function signOut() {
+  pending = null;
   setSession(null);
 }
 

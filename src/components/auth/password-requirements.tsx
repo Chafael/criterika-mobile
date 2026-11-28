@@ -1,11 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { countMetRequirements, passwordRequirements } from '@/data/access-rules';
+import { passwordRequirements, type PasswordRequirement } from '@/data/access-rules';
 import { icons } from '@/media';
 import { authColors, typography } from '@/theme';
 
 type PasswordRequirementsProps = {
   password: string;
+  requirements?: readonly PasswordRequirement[];
 };
 
 /**
@@ -14,9 +15,12 @@ type PasswordRequirementsProps = {
  * empty circle for the filled check (1:468) in the success green, and the bar
  * fills with the same green as the unit progress (1:446).
  */
-export function PasswordRequirements({ password }: PasswordRequirementsProps) {
-  const met = countMetRequirements(password);
-  const total = passwordRequirements.length;
+export function PasswordRequirements({
+  password,
+  requirements = passwordRequirements,
+}: PasswordRequirementsProps) {
+  const met = requirements.filter((requirement) => requirement.isMet(password)).length;
+  const total = requirements.length;
 
   return (
     <View style={styles.root}>
@@ -34,7 +38,7 @@ export function PasswordRequirements({ password }: PasswordRequirementsProps) {
         <View style={[styles.fill, { width: `${(met / total) * 100}%` }]} />
       </View>
       <View style={styles.list}>
-        {passwordRequirements.map((requirement) => {
+        {requirements.map((requirement) => {
           const done = requirement.isMet(password);
           return (
             <View

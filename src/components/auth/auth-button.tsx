@@ -17,6 +17,7 @@ type AuthButtonProps = {
   /** Raised (1:59) or the small drop shadow of 1:288. */
   elevation?: 'raised' | 'chip';
   accessibilityHint?: string;
+  disabled?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -30,6 +31,7 @@ export function AuthButton({
   iconPosition = 'trailing',
   elevation = 'raised',
   accessibilityHint,
+  disabled = false,
   style,
 }: AuthButtonProps) {
   const iconNode = icon ? (
@@ -41,6 +43,8 @@ export function AuthButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.root,
@@ -48,7 +52,7 @@ export function AuthButton({
           height,
           boxShadow: elevation === 'raised' ? shadows.raised : shadows.chip,
         },
-        pressed && styles.pressed,
+        (pressed || disabled) && styles.pressed,
         style,
       ]}>
       {iconPosition === 'leading' ? iconNode : null}

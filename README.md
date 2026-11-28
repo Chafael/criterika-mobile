@@ -25,6 +25,12 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Probar el nivel y el registro
+
+- Deja `EXPO_PUBLIC_API_URL` vacía para usar las cuentas de prueba de `src/mocks/session.ts`. Desde Niveles, abre **Discriminación algorítmica** y pulsa **Iniciar nivel** para jugar el memorama. El progreso y las recompensas del camino son datos de prueba.
+- Para conectar el registro, copia `.env.example` a `.env.local`, asigna a `EXPO_PUBLIC_API_URL` el origen de la API y reinicia Expo. El origen debe ser accesible desde el equipo o celular donde corra la app. La API debe exponer `GET /api/v1/legal/documents/current` y las rutas de inicio, reenvío y verificación bajo `/api/v1/auth/registrations`.
+- La verificación real abre una sesión en memoria durante la ejecución de la app. El acceso con una cuenta existente y la recuperación quedan disponibles con datos de prueba al dejar vacía la URL.
+
 ## Get a fresh project
 
 When you're ready, run:

@@ -46,6 +46,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected guard={session !== null} redirectTo="/inicio-sesion">
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="nivel/[levelId]" />
         </Stack.Protected>
         <Stack.Protected guard={session === null}>
           <Stack.Screen name="(auth)" />
